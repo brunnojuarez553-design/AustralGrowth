@@ -7,7 +7,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id } });
+    const dbUser = await prisma.user.findUnique({ where: { email: user.email! } });
     if (!dbUser) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const { id } = await params;
@@ -40,7 +40,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id } });
+    const dbUser = await prisma.user.findUnique({ where: { email: user.email! } });
     if (!dbUser) return NextResponse.json({ error: "Not found" }, { status: 404 });
     const { id } = await params;
     await prisma.lead.delete({ where: { id, userId: dbUser.id } });

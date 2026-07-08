@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id } });
+    const dbUser = await prisma.user.findUnique({ where: { email: user.email! } });
     if (!dbUser) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const { searchParams } = request.nextUrl;
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id } });
+    const dbUser = await prisma.user.findUnique({ where: { email: user.email! } });
     if (!dbUser) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const body = await request.json();
