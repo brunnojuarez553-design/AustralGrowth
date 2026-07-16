@@ -34,6 +34,20 @@ export type ProposalWithRelations = import('@prisma/client').Proposal & {
 }
 
 // Dashboard types
+export interface DashboardStats {
+  monthlyRevenue: number
+  annualRevenue: number
+  monthlyTarget: number
+  annualTarget: number
+  activeLeads: number
+  hotLeads: number
+  proposalsSent: number
+  closeRate: number
+  avgTicket: number
+  pipelineValue: number
+  monthlyGrowth: number
+}
+
 export interface DashboardMetrics {
   monthlyRevenue: number
   yearlyRevenue: number
