@@ -18,7 +18,7 @@ const MOCK_STATS: DashboardStats = {
 };
 
 const UPCOMING = [
-  { id: "1", company: "WitcherTorque", type: "Reunión", time: "hoy 15:00", color: "#6366F1", initials: "WT", tag: "blue" as const },
+  { id: "1", company: "WitcherTorque", type: "Reunión", time: "hoy 15:00", color: "#F97316", initials: "WT", tag: "blue" as const },
   { id: "2", company: "Roco4WD", type: "Seguimiento WhatsApp", time: "hoy 17:00", color: "#10B981", initials: "RC", tag: "amber" as const },
   { id: "3", company: "CodeCar", type: "Enviar propuesta", time: "mañana", color: "#F59E0B", initials: "CC", tag: "green" as const },
   { id: "4", company: "JART Luxe", type: "Demo pendiente", time: "mañana 11:00", color: "#EF4444", initials: "JL", tag: "red" as const },

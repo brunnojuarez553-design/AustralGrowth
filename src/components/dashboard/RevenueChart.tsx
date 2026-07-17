@@ -24,9 +24,9 @@ export function RevenueChart() {
         <BarChart data={DATA} barSize={28}>
           <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill:"#475569",fontSize:11}} />
           <YAxis hide />
-          <Tooltip content={<CustomTooltip />} cursor={{fill:"rgba(99,102,241,0.05)"}} />
+          <Tooltip content={<CustomTooltip />} cursor={{fill:"rgba(249,115,22,0.05)"}} />
           <Bar dataKey="revenue" radius={[4,4,0,0]}>
-            {DATA.map((_, i) => <Cell key={i} fill={i === DATA.length-1 ? "#6366F1" : "rgba(99,102,241,0.4)"} />)}
+            {DATA.map((_, i) => <Cell key={i} fill={i === DATA.length-1 ? "#F97316" : "rgba(249,115,22,0.4)"} />)}
           </Bar>
         </BarChart>
       </ResponsiveContainer>

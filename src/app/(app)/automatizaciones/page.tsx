@@ -76,7 +76,7 @@ export default function AutomatizacionesPage() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-[13px] font-semibold text-[var(--text)]">{a.name}</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[rgba(99,102,241,0.15)] text-[#A5B4FC] font-medium">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[rgba(249,115,22,0.15)] text-[#FDBA74] font-medium">
                   {TRIGGER_LABELS[a.trigger] ?? a.trigger}
                 </span>
               </div>

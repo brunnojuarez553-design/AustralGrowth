@@ -23,7 +23,7 @@ function LeadCard({ lead, onStageChange }: { lead: LeadWithRelations; onStageCha
   const colors = STAGE_COLORS[lead.stage] ?? STAGE_COLORS.DETECTED
   return (
     <div className={`bg-[var(--surface-2)] border rounded-[7px] p-[10px] mb-[7px] cursor-grab transition-all hover:bg-[var(--surface-3)] hover:-translate-y-[1px] ${
-      lead.isHot ? 'border-[rgba(99,102,241,0.35)] shadow-[0_0_12px_rgba(99,102,241,0.12)]' : 'border-[var(--border)]'
+      lead.isHot ? 'border-[rgba(249,115,22,0.35)] shadow-[0_0_12px_rgba(249,115,22,0.12)]' : 'border-[var(--border)]'
     }`}>
       <div className="text-[12px] font-medium text-[var(--text)] mb-[3px]">{lead.companyName}</div>
       {lead.contactName && <div className="text-[11px] text-[var(--text-3)]">{lead.contactName}</div>}
@@ -34,8 +34,8 @@ function LeadCard({ lead, onStageChange }: { lead: LeadWithRelations; onStageCha
         </div>
       )}
       <div className="flex items-center gap-[5px] mt-[6px]">
-        <div className="w-[5px] h-[5px] rounded-full" style={{ background: lead.isHot ? '#6366F1' : colors.border }} />
-        <span className="text-[10.5px]" style={{ color: lead.isHot ? '#A5B4FC' : 'var(--text-3)' }}>
+        <div className="w-[5px] h-[5px] rounded-full" style={{ background: lead.isHot ? '#F97316' : colors.border }} />
+        <span className="text-[10.5px]" style={{ color: lead.isHot ? '#FDBA74' : 'var(--text-3)' }}>
           {lead.isHot ? 'Caliente 🔥' : (lead.probability ? `${lead.probability}%` : 'Nuevo')}
         </span>
         {lead.priority === 'URGENT' && <span className="ml-auto text-[9px] bg-[rgba(239,68,68,0.15)] text-[#FCA5A5] border border-[rgba(239,68,68,0.2)] rounded-full px-[5px] py-[1px]">URGENTE</span>}

@@ -17,7 +17,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   )
 }
 
-const STAGE_COLORS = ['#6366F1','#7C3AED','#3B82F6','#06B6D4','#10B981','#F59E0B','#EF4444','#059669','#475569']
+const STAGE_COLORS = ['#F97316','#7C3AED','#3B82F6','#06B6D4','#10B981','#F59E0B','#EF4444','#059669','#475569']
 
 export default function DashboardPage() {
   const { data: metrics, isLoading } = useDashboard()
@@ -90,7 +90,7 @@ export default function DashboardPage() {
                 <XAxis dataKey="month" tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}`} />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="revenue" name="Ingresos" fill="#6366F1" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="revenue" name="Ingresos" fill="#F97316" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -115,7 +115,7 @@ export default function DashboardPage() {
                     <div className="text-[11px] text-[var(--text-3)]">{lead.nextFollowUpAt ? formatRelativeTime(lead.nextFollowUpAt) : 'Pendiente'}</div>
                   </div>
                   <span className={`text-[10.5px] px-2 py-[2px] rounded-full font-medium ${
-                    lead.isHot ? 'bg-[rgba(99,102,241,0.12)] text-[#A5B4FC] border border-[rgba(99,102,241,0.2)]'
+                    lead.isHot ? 'bg-[rgba(249,115,22,0.12)] text-[#FDBA74] border border-[rgba(249,115,22,0.2)]'
                     : 'bg-[var(--surface-3)] text-[var(--text-2)] border border-[var(--border-2)]'
                   }`}>
                     {lead.isHot ? '🔥 Caliente' : lead.stage}
@@ -138,7 +138,7 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-2">
               {[
-                { icon: 'ti-flame', color: 'rgba(99,102,241,0.15)', iconColor: '#A5B4FC', text: <><strong className="text-[var(--text)]">6 leads calientes</strong> con alta probabilidad de cierre. WitcherTorque lidera con 84%.</> },
+                { icon: 'ti-flame', color: 'rgba(249,115,22,0.15)', iconColor: '#FDBA74', text: <><strong className="text-[var(--text)]">6 leads calientes</strong> con alta probabilidad de cierre. WitcherTorque lidera con 84%.</> },
                 { icon: 'ti-clock', color: 'rgba(245,158,11,0.15)', iconColor: 'var(--amber)', text: <><strong className="text-[var(--text)]">Hace 5 días</strong> sin contacto con Instaservice Panama. Riesgo de enfriamiento.</> },
                 { icon: 'ti-trending-up', color: 'rgba(16,185,129,0.15)', iconColor: 'var(--green)', text: <>Tu tasa de cierre <strong className="text-[var(--text)]">mejora 12% los martes</strong>. Agendá demos hoy.</> },
               ].map((item, i) => (

@@ -40,7 +40,7 @@ export default function DirectorPage() {
               <div className="text-[12.5px] font-semibold text-[var(--text)]">Análisis del Director</div>
             </div>
             {[
-              { icon: 'ti-flame', bg: 'rgba(99,102,241,0.15)', color: '#A5B4FC', text: 'CodeCar tiene 91% de probabilidad — cerralo hoy.' },
+              { icon: 'ti-flame', bg: 'rgba(249,115,22,0.15)', color: '#FDBA74', text: 'CodeCar tiene 91% de probabilidad — cerralo hoy.' },
               { icon: 'ti-alert-triangle', bg: 'rgba(239,68,68,0.15)', color: '#FCA5A5', text: 'Propuesta de JART Luxe sin respuesta 3 días.' },
               { icon: 'ti-trending-up', bg: 'rgba(16,185,129,0.15)', color: 'var(--green)', text: 'Automotriz VZ: tu rubro más rentable (74% cierre).' },
             ].map((item, i) => (
@@ -88,7 +88,7 @@ export default function DirectorPage() {
               <div key={i} className={`p-3 rounded-[8px] text-[12.5px] leading-[1.6] ${
                 msg.role === 'assistant'
                   ? 'bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text-2)] border-l-2 border-l-[var(--amber)]'
-                  : 'bg-[rgba(99,102,241,0.1)] border border-[rgba(99,102,241,0.2)] text-[var(--text)] text-right ml-8'
+                  : 'bg-[rgba(249,115,22,0.1)] border border-[rgba(249,115,22,0.2)] text-[var(--text)] text-right ml-8'
               }`}>
                 {msg.content}
               </div>

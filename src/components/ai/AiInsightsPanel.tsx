@@ -5,7 +5,7 @@ import { Flame, Clock, AlertTriangle, Lightbulb, Brain } from "lucide-react";
 import type { DashboardStats } from "@/types";
 
 const MOCK_INSIGHTS = [
-  { id:"1", type:"hot_lead", icon: Flame, color:"rgba(99,102,241,0.15)", textColor:"#A5B4FC", text: "6 leads con alta probabilidad de cierre. WitcherTorque lidera con 84%." },
+  { id:"1", type:"hot_lead", icon: Flame, color:"rgba(249,115,22,0.15)", textColor:"#FDBA74", text: "6 leads con alta probabilidad de cierre. WitcherTorque lidera con 84%." },
   { id:"2", type:"followup", icon: Clock, color:"rgba(245,158,11,0.15)", textColor:"#FCD34D", text: "Hace 5 días sin contacto con Instaservice Panama. Riesgo de enfriamiento." },
   { id:"3", type:"risk", icon: AlertTriangle, color:"rgba(239,68,68,0.15)", textColor:"#FCA5A5", text: "JART Luxe no abrió la propuesta en 3 días. Probabilidad de abandono: 62%." },
   { id:"4", type:"opportunity", icon: Lightbulb, color:"rgba(16,185,129,0.15)", textColor:"#6EE7B7", text: "Tu tasa de cierre mejora 12% los martes. Agenda demos hoy." },

@@ -1,6 +1,6 @@
 "use client";
 const FUNNEL = [
-  { label: "Detectados", count: 87, color: "#6366F1" },
+  { label: "Detectados", count: 87, color: "#F97316" },
   { label: "Contactados", count: 64, color: "#7C3AED" },
   { label: "Respondieron", count: 38, color: "#3B82F6" },
   { label: "Propuesta env.", count: 21, color: "#10B981" },

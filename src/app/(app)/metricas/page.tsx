@@ -2,7 +2,7 @@
 import { Topbar } from '@/components/layout/Topbar'
 
 const byIndustry = [
-  { label: 'Automotriz VZ', pct: 74, color: '#6366F1' },
+  { label: 'Automotriz VZ', pct: 74, color: '#F97316' },
   { label: 'Automotriz MX', pct: 51, color: '#3B82F6' },
   { label: 'Hospitalidad AR', pct: 38, color: '#10B981' },
   { label: 'Detailing LATAM', pct: 29, color: '#F59E0B' },

@@ -59,13 +59,13 @@ export function PipelineBoard() {
                 draggable
                 onDragStart={() => setDragId(deal.id)}
                 className={`rounded-[7px] p-2.5 cursor-grab transition-all ${deal.hot ? "deal-hot" : ""}`}
-                style={{background:"var(--surface-2)",border:`1px solid ${deal.hot?"rgba(99,102,241,0.35)":"var(--border)"}`}}
+                style={{background:"var(--surface-2)",border:`1px solid ${deal.hot?"rgba(249,115,22,0.35)":"var(--border)"}`}}
               >
                 <div className="text-[12px] font-medium mb-0.5" style={{color:"var(--text)"}}>{deal.company}</div>
                 <div className="text-[11px] mb-1.5" style={{color:"var(--text-3)"}}>{deal.country}</div>
                 <div className="text-[11.5px] font-semibold font-mono" style={{color:"var(--green)"}}>{formatCurrency(deal.value)}</div>
                 <div className="flex items-center gap-1.5 mt-1.5">
-                  {deal.hot && <Flame size={10} style={{color:"#A5B4FC"}} />}
+                  {deal.hot && <Flame size={10} style={{color:"#FDBA74"}} />}
                   <div className="h-1 flex-1 rounded-full overflow-hidden" style={{background:"var(--surface-3)"}}>
                     <div className="h-full rounded-full" style={{width:`${deal.score}%`,background:deal.score>70?"var(--green)":deal.score>40?"var(--amber)":"var(--red)"}}/>
                   </div>

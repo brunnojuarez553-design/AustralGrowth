@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 const mockLeads = [
   { name: 'CodeCar', prob: 91, color: 'var(--green)', bg: 'rgba(16,185,129,0.12)', initials: 'CC' },
-  { name: 'WitcherTorque', prob: 84, color: '#A5B4FC', bg: 'rgba(99,102,241,0.12)', initials: 'WT' },
+  { name: 'WitcherTorque', prob: 84, color: '#FDBA74', bg: 'rgba(249,115,22,0.12)', initials: 'WT' },
   { name: 'Roco4WD', prob: 78, color: '#C4B5FD', bg: 'rgba(124,58,237,0.12)', initials: 'R4' },
   { name: 'JART Luxe', prob: 52, color: 'var(--amber)', bg: 'rgba(245,158,11,0.12)', initials: 'JL' },
   { name: 'High Perf. SLP', prob: 34, color: '#FCA5A5', bg: 'rgba(239,68,68,0.12)', initials: 'HP' },
@@ -32,7 +32,7 @@ export default function IAPage() {
                 <div><div className="text-[12.5px] font-semibold text-[var(--text)]">Insights de hoy</div><div className="text-[10.5px] text-[var(--text-3)]">Basado en tu CRM completo</div></div>
               </div>
               {[
-                { icon: 'ti-flame', bg: 'rgba(99,102,241,0.15)', c: '#A5B4FC', text: 'Tenés 6 leads calientes. Si cerrás la mitad, superás el objetivo mensual.' },
+                { icon: 'ti-flame', bg: 'rgba(249,115,22,0.15)', c: '#FDBA74', text: 'Tenés 6 leads calientes. Si cerrás la mitad, superás el objetivo mensual.' },
                 { icon: 'ti-clock', bg: 'rgba(245,158,11,0.15)', c: 'var(--amber)', text: 'Hace 5 días sin seguimiento a Instaservice Panama. Riesgo de perderlo.' },
                 { icon: 'ti-alert-triangle', bg: 'rgba(239,68,68,0.15)', c: '#FCA5A5', text: 'JART Luxe no abrió la propuesta en 3 días. Necesita seguimiento urgente.' },
                 { icon: 'ti-bulb', bg: 'rgba(16,185,129,0.15)', c: 'var(--green)', text: 'Tu mejor rubro es automotriz VZ. Hay 12 prospectos similares sin contactar.' },
@@ -48,7 +48,7 @@ export default function IAPage() {
               <div className="flex gap-2 mb-3 flex-wrap">
                 {[['whatsapp','ti-brand-whatsapp','WhatsApp'],['email','ti-mail','Email'],['script','ti-phone','Script llamada']].map(([k,icon,label]) => (
                   <button key={k} onClick={() => { setChannel(k); setGeneratedMsg(msgs[k]); }}
-                    className={`flex items-center gap-[6px] px-3 py-[5px] rounded-[7px] text-[11.5px] font-medium border transition-all ${channel === k ? 'bg-[rgba(99,102,241,0.15)] text-[#A5B4FC] border-[rgba(99,102,241,0.3)]' : 'text-[var(--text-2)] border-[var(--border-2)] hover:bg-[var(--surface-3)]'}`}>
+                    className={`flex items-center gap-[6px] px-3 py-[5px] rounded-[7px] text-[11.5px] font-medium border transition-all ${channel === k ? 'bg-[rgba(249,115,22,0.15)] text-[#FDBA74] border-[rgba(249,115,22,0.3)]' : 'text-[var(--text-2)] border-[var(--border-2)] hover:bg-[var(--surface-3)]'}`}>
                     <i className={`ti ${icon} text-[13px]`} aria-hidden="true" />{label}
                   </button>
                 ))}
