@@ -5,8 +5,10 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 export async function POST() {
   try {
     const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user || !user.email) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (!user || !user.email) {
+      return NextResponse.json({ error: 'No autorizado', debug: authError?.message ?? 'sin usuario' }, { status: 401 })
+    }
 
     const existing = await prisma.user.findUnique({ where: { email: user.email } })
     if (existing) return NextResponse.json({ data: existing })
