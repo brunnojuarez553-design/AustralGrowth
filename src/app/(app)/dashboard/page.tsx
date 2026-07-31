@@ -38,10 +38,10 @@ export default function DashboardPage() {
         {/* KPI Row */}
         <div className="grid grid-cols-4 gap-3">
           {[
-            { label: 'Facturación mes', value: formatCurrency(m?.monthlyRevenue ?? 4820), change: '+23%', up: true, icon: 'ti-coin' },
-            { label: 'Objetivo mensual', value: formatCurrency(m?.monthlyGoal ?? 6000), progress: m?.monthlyGoalProgress ?? 80, icon: 'ti-target' },
-            { label: 'Leads activos', value: String(m?.activeLeads ?? 24), change: `${m?.hotLeads ?? 6} calientes 🔥`, up: true, icon: 'ti-users' },
-            { label: 'Tasa de cierre', value: `${(m?.closeRate ?? 31).toFixed(0)}%`, change: '+4pts vs mes ant.', up: true, icon: 'ti-percentage' },
+            { label: 'Facturación mes', value: formatCurrency(m?.monthlyRevenue ?? 0), change: '+23%', up: true, icon: 'ti-coin' },
+            { label: 'Objetivo mensual', value: formatCurrency(m?.monthlyGoal ?? 0), progress: m?.monthlyGoalProgress ?? 0, icon: 'ti-target' },
+            { label: 'Leads activos', value: String(m?.activeLeads ?? 0), change: `${m?.hotLeads ?? 0} calientes 🔥`, up: true, icon: 'ti-users' },
+            { label: 'Tasa de cierre', value: `${(m?.closeRate ?? 0).toFixed(0)}%`, change: '+4pts vs mes ant.', up: true, icon: 'ti-percentage' },
           ].map((kpi, i) => (
             <div key={i} className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[10px] p-4">
               <div className="flex items-center gap-[5px] text-[11px] text-[var(--text-3)] font-medium mb-[6px]">

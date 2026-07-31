@@ -8,7 +8,7 @@ import { cn, getInitials } from '@/lib/utils'
 const navItems = [
   { group: 'Principal', items: [
     { href: '/dashboard', label: 'Dashboard', icon: 'ti-layout-dashboard' },
-    { href: '/crm', label: 'CRM Pipeline', icon: 'ti-layout-kanban', badge: '24' },
+    { href: '/crm', label: 'CRM Pipeline', icon: 'ti-layout-kanban' },
     { href: '/ia', label: 'IA Comercial', icon: 'ti-brain', aiBadge: true },
   ]},
   { group: 'Ventas', items: [
@@ -72,11 +72,6 @@ export function Sidebar() {
                 >
                   <i className={`ti ${item.icon} text-[15px] w-4 text-center`} aria-hidden="true" />
                   <span>{item.label}</span>
-                  {item.badge && (
-                    <span className="ml-auto text-[10px] bg-[var(--accent)] text-white rounded-full px-[6px] py-[1px] font-semibold">
-                      {item.badge}
-                    </span>
-                  )}
                   {item.aiBadge && (
                     <span className="ml-auto text-[9px] bg-[rgba(245,158,11,0.15)] text-[var(--amber)] rounded-full px-[5px] py-[1px] font-semibold border border-[rgba(245,158,11,0.2)]">
                       IA
