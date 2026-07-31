@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { usePipeline } from '@/hooks/usePipeline'
 import { useUpdateLeadStage } from '@/hooks/useLeads'
 import { Topbar } from '@/components/layout/Topbar'
-import { formatCurrency, STAGE_LABELS } from '@/lib/utils'
+import { LeadFormModal } from '@/components/crm/LeadFormModal'
+import { formatCurrency } from '@/lib/utils'
 import type { LeadWithRelations, PipelineColumn } from '@/types'
 
 const STAGE_COLORS: Record<string, { border: string; text: string }> = {
@@ -19,12 +20,21 @@ const STAGE_COLORS: Record<string, { border: string; text: string }> = {
   LOST:        { border: '#EF4444', text: '#FCA5A5' },
 }
 
-function LeadCard({ lead, onStageChange }: { lead: LeadWithRelations; onStageChange: (id: string, stage: string) => void }) {
+function LeadCard({ lead, onOpen, onDragStart }: {
+  lead: LeadWithRelations
+  onOpen: () => void
+  onDragStart: (e: React.DragEvent, lead: LeadWithRelations) => void
+}) {
   const colors = STAGE_COLORS[lead.stage] ?? STAGE_COLORS.DETECTED
   return (
-    <div className={`bg-[var(--surface-2)] border rounded-[7px] p-[10px] mb-[7px] cursor-grab transition-all hover:bg-[var(--surface-3)] hover:-translate-y-[1px] ${
-      lead.isHot ? 'border-[rgba(249,115,22,0.35)] shadow-[0_0_12px_rgba(249,115,22,0.12)]' : 'border-[var(--border)]'
-    }`}>
+    <div
+      draggable
+      onDragStart={e => onDragStart(e, lead)}
+      onClick={onOpen}
+      className={`bg-[var(--surface-2)] border rounded-[7px] p-[10px] mb-[7px] cursor-pointer transition-all hover:bg-[var(--surface-3)] hover:-translate-y-[1px] active:cursor-grabbing ${
+        lead.isHot ? 'border-[rgba(249,115,22,0.35)] shadow-[0_0_12px_rgba(249,115,22,0.12)]' : 'border-[var(--border)]'
+      }`}
+    >
       <div className="text-[12px] font-medium text-[var(--text)] mb-[3px]">{lead.companyName}</div>
       {lead.contactName && <div className="text-[11px] text-[var(--text-3)]">{lead.contactName}</div>}
       <div className="text-[11px] text-[var(--text-3)]">{lead.industry} · {lead.country}</div>
@@ -34,7 +44,7 @@ function LeadCard({ lead, onStageChange }: { lead: LeadWithRelations; onStageCha
         </div>
       )}
       <div className="flex items-center gap-[5px] mt-[6px]">
-        <div className="w-[5px] h-[5px] rounded-full" style={{ background: lead.isHot ? '#F97316' : colors.border }} />
+        <div className="w-[5px] h-[5px] rounded-full" style={{ background: lead.isHot ? 'var(--accent)' : colors.border }} />
         <span className="text-[10.5px]" style={{ color: lead.isHot ? '#FDBA74' : 'var(--text-3)' }}>
           {lead.isHot ? 'Caliente 🔥' : (lead.probability ? `${lead.probability}%` : 'Nuevo')}
         </span>
@@ -44,17 +54,30 @@ function LeadCard({ lead, onStageChange }: { lead: LeadWithRelations; onStageCha
   )
 }
 
-function PipelineCol({ column, onStageChange }: { column: PipelineColumn; onStageChange: (id: string, stage: string) => void }) {
+function PipelineCol({ column, onOpenLead, onDragStart, onDrop }: {
+  column: PipelineColumn
+  onOpenLead: (lead: LeadWithRelations) => void
+  onDragStart: (e: React.DragEvent, lead: LeadWithRelations) => void
+  onDrop: (stage: string) => void
+}) {
+  const [isOver, setIsOver] = useState(false)
   const colors = STAGE_COLORS[column.stage] ?? STAGE_COLORS.DETECTED
+
   return (
-    <div className="min-w-[168px] w-[168px] shrink-0">
+    <div
+      className="min-w-[168px] w-[168px] shrink-0 rounded-[8px] transition-colors"
+      style={{ background: isOver ? 'rgba(249,115,22,0.06)' : 'transparent' }}
+      onDragOver={e => { e.preventDefault(); setIsOver(true) }}
+      onDragLeave={() => setIsOver(false)}
+      onDrop={e => { e.preventDefault(); setIsOver(false); onDrop(column.stage) }}
+    >
       <div className="flex items-center justify-between mb-3 pb-2" style={{ borderBottom: `2px solid ${colors.border}20` }}>
         <span className="text-[11px] font-semibold" style={{ color: colors.text }}>{column.label}</span>
         <span className="text-[10px] font-mono text-[var(--text-3)]">{column.leads.length}</span>
       </div>
       <div className="min-h-[200px]">
         {column.leads.map(lead => (
-          <LeadCard key={lead.id} lead={lead} onStageChange={onStageChange} />
+          <LeadCard key={lead.id} lead={lead} onOpen={() => onOpenLead(lead)} onDragStart={onDragStart} />
         ))}
         {column.leads.length === 0 && (
           <div className="border-2 border-dashed border-[var(--border)] rounded-[7px] h-[80px] flex items-center justify-center">
@@ -74,6 +97,31 @@ function PipelineCol({ column, onStageChange }: { column: PipelineColumn; onStag
 export default function CRMPage() {
   const { data: pipeline, isLoading } = usePipeline()
   const updateStage = useUpdateLeadStage()
+  const [modalOpen, setModalOpen] = useState(false)
+  const [selectedLead, setSelectedLead] = useState<LeadWithRelations | null>(null)
+  const [draggingLead, setDraggingLead] = useState<LeadWithRelations | null>(null)
+
+  function openEdit(lead: LeadWithRelations) {
+    setSelectedLead(lead)
+    setModalOpen(true)
+  }
+
+  function openCreate() {
+    setSelectedLead(null)
+    setModalOpen(true)
+  }
+
+  function handleDragStart(e: React.DragEvent, lead: LeadWithRelations) {
+    setDraggingLead(lead)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  function handleDrop(stage: string) {
+    if (draggingLead && draggingLead.stage !== stage) {
+      updateStage.mutate({ id: draggingLead.id, stage })
+    }
+    setDraggingLead(null)
+  }
 
   if (isLoading) return (
     <div className="flex-1 flex items-center justify-center">
@@ -86,15 +134,14 @@ export default function CRMPage() {
 
   return (
     <>
-      <Topbar title="CRM Pipeline" subtitle={`${summary.totalLeads ?? 24} leads activos · Vista Kanban`} primaryAction={{ label: 'Nuevo lead', onClick: () => {} }} />
+      <Topbar title="CRM Pipeline" subtitle={`${summary.totalLeads ?? 0} leads activos · Arrastrá para cambiar de etapa`} primaryAction={{ label: 'Nuevo lead', onClick: openCreate }} />
       <div className="flex-1 overflow-hidden flex flex-col p-5 gap-4">
-        {/* Summary */}
         <div className="grid grid-cols-4 gap-3 shrink-0">
           {[
-            { label: 'Valor en pipeline', value: formatCurrency(summary.totalPipelineValue ?? 14280) },
-            { label: 'Leads calientes', value: String(summary.hotLeads ?? 6) },
-            { label: 'Ticket promedio', value: formatCurrency(summary.avgTicket ?? 595) },
-            { label: 'Tiempo prom. cierre', value: '18 días' },
+            { label: 'Valor en pipeline', value: formatCurrency(summary.totalPipelineValue ?? 0) },
+            { label: 'Leads calientes', value: String(summary.hotLeads ?? 0) },
+            { label: 'Ticket promedio', value: formatCurrency(summary.avgTicket ?? 0) },
+            { label: 'Total de leads', value: String(summary.totalLeads ?? 0) },
           ].map((s, i) => (
             <div key={i} className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[8px] p-3">
               <div className="text-[10.5px] text-[var(--text-3)] mb-1">{s.label}</div>
@@ -102,15 +149,16 @@ export default function CRMPage() {
             </div>
           ))}
         </div>
-        {/* Kanban */}
         <div className="flex-1 overflow-x-auto">
           <div className="flex gap-[10px] h-full pb-2" style={{ minWidth: 'max-content' }}>
             {columns.map(col => (
-              <PipelineCol key={col.stage} column={col} onStageChange={(id, stage) => updateStage.mutate({ id, stage })} />
+              <PipelineCol key={col.stage} column={col} onOpenLead={openEdit} onDragStart={handleDragStart} onDrop={handleDrop} />
             ))}
           </div>
         </div>
       </div>
+
+      <LeadFormModal open={modalOpen} onClose={() => setModalOpen(false)} lead={selectedLead} />
     </>
   )
 }

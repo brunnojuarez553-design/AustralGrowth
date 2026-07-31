@@ -1,9 +1,22 @@
 'use client'
 
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Topbar } from '@/components/layout/Topbar'
+import { FinanceFormModal } from '@/components/finanzas/FinanceFormModal'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+
+interface FinanceEntry {
+  id: string
+  type: 'INCOME' | 'EXPENSE' | 'ADVANCE' | 'PENDING'
+  category: string
+  description: string
+  amount: number
+  currency: string
+  date: string
+  isPaid: boolean
+}
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null
@@ -18,38 +31,53 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 }
 
 export default function FinanzasPage() {
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editingEntry, setEditingEntry] = useState<FinanceEntry | null>(null)
+
   const { data, isLoading } = useQuery({
     queryKey: ['finances'],
     queryFn: async () => {
       const res = await fetch('/api/finances')
       const json = await res.json()
-      return json.data
+      return json.data as { finances: FinanceEntry[]; summary: Record<string, number> }
     },
-    staleTime: 60_000,
+    staleTime: 30_000,
   })
 
-  const summary = data?.summary ?? { totalIncome: 4820, totalExpenses: 480, netProfit: 2957, pending: 1180 }
+  const summary = data?.summary ?? { totalIncome: 0, totalExpenses: 0, netProfit: 0, pending: 0, margin: 0 }
   const finances = data?.finances ?? []
 
-  const mockChart = [
-    { month: 'Ene', revenue: 1800, expenses: 320 },
-    { month: 'Feb', revenue: 2400, expenses: 410 },
-    { month: 'Mar', revenue: 3100, expenses: 380 },
-    { month: 'Abr', revenue: 2900, expenses: 520 },
-    { month: 'May', revenue: 3900, expenses: 460 },
-    { month: 'Jun', revenue: 4820, expenses: 480 },
-  ]
+  const chartData = (() => {
+    const now = new Date()
+    const months: { month: string; revenue: number; expenses: number }[] = []
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const label = d.toLocaleDateString('es', { month: 'short' })
+      const inMonth = finances.filter(f => {
+        const fd = new Date(f.date)
+        return fd.getFullYear() === d.getFullYear() && fd.getMonth() === d.getMonth()
+      })
+      months.push({
+        month: label,
+        revenue: inMonth.filter(f => f.type === 'INCOME').reduce((s, f) => s + f.amount, 0),
+        expenses: inMonth.filter(f => f.type === 'EXPENSE').reduce((s, f) => s + f.amount, 0),
+      })
+    }
+    return months
+  })()
+
+  function openCreate() { setEditingEntry(null); setModalOpen(true) }
+  function openEdit(entry: FinanceEntry) { setEditingEntry(entry); setModalOpen(true) }
 
   return (
     <>
-      <Topbar title="Finanzas" subtitle="Control financiero completo" primaryAction={{ label: 'Registrar ingreso', onClick: () => {} }} />
+      <Topbar title="Finanzas" subtitle="Control financiero completo" primaryAction={{ label: 'Registrar movimiento', onClick: openCreate }} />
       <div className="flex-1 overflow-y-auto p-5 space-y-4">
-        {/* KPIs */}
         <div className="grid grid-cols-4 gap-3">
           {[
             { label: 'Facturación mes', value: formatCurrency(summary.totalIncome), color: 'var(--text)', icon: 'ti-coin' },
-            { label: 'Cobrado', value: formatCurrency(summary.totalIncome - summary.pending), color: 'var(--text)', icon: 'ti-check' },
-            { label: 'Pendiente', value: formatCurrency(summary.pending ?? 1180), color: 'var(--amber)', icon: 'ti-clock' },
+            { label: 'Cobrado', value: formatCurrency(summary.totalIncome - (summary.pending ?? 0)), color: 'var(--text)', icon: 'ti-check' },
+            { label: 'Pendiente', value: formatCurrency(summary.pending ?? 0), color: 'var(--amber)', icon: 'ti-clock' },
             { label: 'Gastos del mes', value: formatCurrency(summary.totalExpenses), color: 'var(--red)', icon: 'ti-minus' },
           ].map((k, i) => (
             <div key={i} className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[10px] p-4">
@@ -62,41 +90,39 @@ export default function FinanzasPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          {/* Movements */}
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] p-4">
             <div className="text-[13px] font-semibold text-[var(--text)] mb-4">Movimientos · {new Date().toLocaleDateString('es', { month: 'long', year: 'numeric' })}</div>
-            <div className="space-y-0">
-              {[
-                { desc: 'Roco4WD · Anticipo 50%', amount: 750, type: 'INCOME', date: '2026-06-15' },
-                { desc: 'Valentino Motors · Pago final', amount: 490, type: 'INCOME', date: '2026-06-12' },
-                { desc: 'JART Luxe · Anticipo 50%', amount: 450, type: 'INCOME', date: '2026-06-08' },
-                { desc: 'Barba Roja · Pago final', amount: 350, type: 'INCOME', date: '2026-06-05' },
-                { desc: 'Vercel Pro', amount: 20, type: 'EXPENSE', date: '2026-06-01' },
-                { desc: 'Cloudinary Plan', amount: 45, type: 'EXPENSE', date: '2026-06-01' },
-                { desc: 'Groq API', amount: 18, type: 'EXPENSE', date: '2026-06-15' },
-              ].map((mov, i) => (
-                <div key={i} className="flex items-center justify-between py-[10px] border-b border-[var(--border)] last:border-0">
+            <div className="space-y-0 max-h-[340px] overflow-y-auto">
+              {isLoading && <div className="text-[12px] text-[var(--text-3)] py-4 text-center">Cargando...</div>}
+              {!isLoading && finances.length === 0 && (
+                <div className="text-[12px] text-[var(--text-3)] py-4 text-center">
+                  Todavía no cargaste ningún movimiento. Usá el botón "Registrar movimiento".
+                </div>
+              )}
+              {finances.map(mov => (
+                <div key={mov.id} onClick={() => openEdit(mov)} className="flex items-center justify-between py-[10px] border-b border-[var(--border)] last:border-0 cursor-pointer hover:bg-[var(--surface-3)] px-1 rounded transition-all">
                   <div>
-                    <div className="text-[12.5px] text-[var(--text)]">{mov.desc}</div>
-                    <div className="text-[10.5px] text-[var(--text-3)]">{mov.date}</div>
+                    <div className="text-[12.5px] text-[var(--text)]">{mov.description}</div>
+                    <div className="text-[10.5px] text-[var(--text-3)]">{formatDate(mov.date)} · {mov.category}</div>
                   </div>
-                  <span className={`font-mono text-[13px] font-semibold ${mov.type === 'INCOME' ? 'text-[var(--green)]' : 'text-[var(--red)]'}`}>
-                    {mov.type === 'INCOME' ? '+' : '-'}{formatCurrency(mov.amount)}
+                  <span className={`font-mono text-[13px] font-semibold ${mov.type === 'INCOME' || mov.type === 'ADVANCE' ? 'text-[var(--green)]' : mov.type === 'PENDING' ? 'text-[var(--amber)]' : 'text-[var(--red)]'}`}>
+                    {mov.type === 'EXPENSE' ? '-' : '+'}{formatCurrency(mov.amount)}
                   </span>
                 </div>
               ))}
-              <div className="flex items-center justify-between py-3">
-                <span className="text-[12.5px] font-semibold text-[var(--text)]">Beneficio neto</span>
-                <span className="font-mono text-[15px] font-bold text-[var(--green)]">{formatCurrency(summary.netProfit ?? 2957)}</span>
-              </div>
+              {finances.length > 0 && (
+                <div className="flex items-center justify-between py-3">
+                  <span className="text-[12.5px] font-semibold text-[var(--text)]">Beneficio neto</span>
+                  <span className="font-mono text-[15px] font-bold text-[var(--green)]">{formatCurrency(summary.netProfit ?? 0)}</span>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Chart */}
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] p-4">
-            <div className="text-[13px] font-semibold text-[var(--text)] mb-4">Flujo de caja 2026</div>
+            <div className="text-[13px] font-semibold text-[var(--text)] mb-4">Flujo de caja · últimos 6 meses</div>
             <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={mockChart} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+              <AreaChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
@@ -118,20 +144,22 @@ export default function FinanzasPage() {
             <div className="mt-4 grid grid-cols-3 gap-3 border-t border-[var(--border)] pt-4">
               <div className="text-center">
                 <div className="text-[10px] text-[var(--text-3)]">Margen neto</div>
-                <div className="text-[15px] font-bold text-[var(--green)] font-mono">61%</div>
+                <div className="text-[15px] font-bold text-[var(--green)] font-mono">{Math.round(summary.margin ?? 0)}%</div>
               </div>
               <div className="text-center">
-                <div className="text-[10px] text-[var(--text-3)]">MRR</div>
-                <div className="text-[15px] font-bold text-[var(--text)] font-mono">$4.820</div>
+                <div className="text-[10px] text-[var(--text-3)]">Facturación mes</div>
+                <div className="text-[15px] font-bold text-[var(--text)] font-mono">{formatCurrency(summary.totalIncome)}</div>
               </div>
               <div className="text-center">
                 <div className="text-[10px] text-[var(--text-3)]">Proyección anual</div>
-                <div className="text-[15px] font-bold text-[var(--text)] font-mono">$57K</div>
+                <div className="text-[15px] font-bold text-[var(--text)] font-mono">{formatCurrency(summary.totalIncome * 12)}</div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <FinanceFormModal open={modalOpen} onClose={() => setModalOpen(false)} entry={editingEntry} />
     </>
   )
 }

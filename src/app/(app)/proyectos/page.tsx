@@ -1,7 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Topbar } from '@/components/layout/Topbar'
+import { ProjectFormModal } from '@/components/proyectos/ProjectFormModal'
 import { formatDate } from '@/lib/utils'
 import type { ProjectWithRelations } from '@/types'
 
@@ -18,6 +20,7 @@ const COLUMNS = ['PLANNING', 'IN_PROGRESS', 'IN_REVIEW', 'COMPLETED'] as const
 
 export default function ProyectosPage() {
   const qc = useQueryClient()
+  const [modalOpen, setModalOpen] = useState(false)
   const { data, isLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
@@ -46,7 +49,7 @@ export default function ProyectosPage() {
       <Topbar
         title="Proyectos"
         subtitle={`${projects.length} proyectos · ${active} en curso`}
-        primaryAction={{ label: 'Nuevo proyecto', onClick: () => {} }}
+        primaryAction={{ label: 'Nuevo proyecto', onClick: () => setModalOpen(true) }}
       />
       <div className="flex-1 overflow-hidden flex flex-col p-5 gap-4">
         {isLoading && (
@@ -101,6 +104,8 @@ export default function ProyectosPage() {
           </div>
         )}
       </div>
+
+      <ProjectFormModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </>
   )
 }
