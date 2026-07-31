@@ -11,7 +11,8 @@ export const revalidate = 300 // 5 min cache
 export async function GET(req: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
     const dbUser = await prisma.user.findUnique({

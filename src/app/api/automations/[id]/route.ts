@@ -5,7 +5,8 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
     const dbUser = await prisma.user.findUnique({ where: { email: user.email! } })
@@ -29,7 +30,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
     const dbUser = await prisma.user.findUnique({ where: { email: user.email! } })

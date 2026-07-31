@@ -28,7 +28,8 @@ const leadCreateSchema = z.object({
 
 async function getWorkspaceId(req: NextRequest): Promise<string | null> {
   const supabase = await createServerSupabaseClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+  const user = session?.user
   if (!user) return null
   
   const dbUser = await prisma.user.findUnique({
@@ -97,7 +98,8 @@ export async function POST(req: NextRequest) {
     if (!workspaceId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
     const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    const user = session?.user
     const dbUser = await prisma.user.findUnique({ where: { email: user!.email! } })
 
     const body = await req.json()

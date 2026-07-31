@@ -26,7 +26,8 @@ const proposalSchema = z.object({
 export async function GET(req: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
     const dbUser = await prisma.user.findUnique({ where: { email: user.email! } })
@@ -50,7 +51,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
     const dbUser = await prisma.user.findUnique({ where: { email: user.email! } })

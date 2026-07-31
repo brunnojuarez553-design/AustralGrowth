@@ -5,7 +5,8 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 export async function POST() {
   try {
     const supabase = await createServerSupabaseClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { data: { session }, error: authError } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user || !user.email) {
       return NextResponse.json({ error: 'No autorizado', debug: authError?.message ?? 'sin usuario' }, { status: 401 })
     }
