@@ -12,7 +12,7 @@ async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
   })
   if (!res.ok) {
     const err = await res.json()
-    throw new Error(err.error ?? 'Request failed')
+    throw new Error(err.debug ? `${err.error}: ${err.debug}` : (err.error ?? 'Request failed'))
   }
   return res.json()
 }

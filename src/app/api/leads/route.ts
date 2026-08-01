@@ -130,6 +130,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Datos inválidos', details: error.errors }, { status: 400 })
     }
     console.error('POST /api/leads error:', error)
-    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Error interno'
+    return NextResponse.json({ error: 'Error interno', debug: message }, { status: 500 })
   }
 }
