@@ -1,7 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import { useDashboard } from '@/hooks/useDashboard'
 import { Topbar } from '@/components/layout/Topbar'
+import { LeadFormModal } from '@/components/crm/LeadFormModal'
 import { formatCurrency, formatRelativeTime } from '@/lib/utils'
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
@@ -21,6 +23,7 @@ const STAGE_COLORS = ['#F97316','#7C3AED','#3B82F6','#06B6D4','#10B981','#F59E0B
 
 export default function DashboardPage() {
   const { data: metrics, isLoading } = useDashboard()
+  const [modalOpen, setModalOpen] = useState(false)
 
   if (isLoading) return (
     <div className="flex-1 flex items-center justify-center">
@@ -32,7 +35,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      <Topbar title="Dashboard Ejecutivo" subtitle={`${new Date().toLocaleDateString('es', { month: 'long', year: 'numeric' })} · Vista general`} primaryAction={{ label: 'Nuevo lead', onClick: () => {} }} />
+      <Topbar title="Dashboard Ejecutivo" subtitle={`${new Date().toLocaleDateString('es', { month: 'long', year: 'numeric' })} · Vista general`} primaryAction={{ label: 'Nuevo lead', onClick: () => setModalOpen(true) }} />
       <div className="flex-1 overflow-y-auto p-5 space-y-4">
 
         {/* KPI Row */}
@@ -154,6 +157,8 @@ export default function DashboardPage() {
         </div>
 
       </div>
+
+      <LeadFormModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </>
   )
 }
