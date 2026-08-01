@@ -93,6 +93,6 @@ Somos Austral Web Studio — agencia de diseño web y marketing digital premium 
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 })
     }
-    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
+    return NextResponse.json({ error: 'Error interno', debug: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }

@@ -166,6 +166,6 @@ export async function GET(req: NextRequest) {
     })
   } catch (error) {
     console.error('GET /api/dashboard error:', error)
-    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
+    return NextResponse.json({ error: 'Error interno', debug: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }

@@ -75,6 +75,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, totalInsights, workspacesProcessed: workspaces.length })
   } catch (error) {
     console.error('CRON ai-insights error:', error)
-    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
+    return NextResponse.json({ error: 'Error interno', debug: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }

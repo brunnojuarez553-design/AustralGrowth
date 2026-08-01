@@ -72,6 +72,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, executionsCount })
   } catch (error) {
     console.error('CRON automations error:', error)
-    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
+    return NextResponse.json({ error: 'Error interno', debug: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }

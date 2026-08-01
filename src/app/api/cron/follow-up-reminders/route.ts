@@ -53,6 +53,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, tasksCreated, leadsProcessed: leadsWithFollowUp.length })
   } catch (error) {
     console.error('CRON follow-up-reminders error:', error)
-    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
+    return NextResponse.json({ error: 'Error interno', debug: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }

@@ -22,7 +22,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const STAGE_COLORS = ['#F97316','#7C3AED','#3B82F6','#06B6D4','#10B981','#F59E0B','#EF4444','#059669','#475569']
 
 export default function DashboardPage() {
-  const { data: metrics, isLoading } = useDashboard()
+  const { data: metrics, isLoading, isError, error } = useDashboard()
   const [modalOpen, setModalOpen] = useState(false)
 
   if (isLoading) return (
@@ -37,6 +37,12 @@ export default function DashboardPage() {
     <>
       <Topbar title="Dashboard Ejecutivo" subtitle={`${new Date().toLocaleDateString('es', { month: 'long', year: 'numeric' })} · Vista general`} primaryAction={{ label: 'Nuevo lead', onClick: () => setModalOpen(true) }} />
       <div className="flex-1 overflow-y-auto p-5 space-y-4">
+
+        {isError && (
+          <div className="text-[12.5px] rounded-[8px] px-4 py-3" style={{ background: 'rgba(239,68,68,0.1)', color: '#FCA5A5', border: '1px solid rgba(239,68,68,0.2)' }}>
+            No se pudo cargar el dashboard: {(error as Error)?.message}
+          </div>
+        )}
 
         {/* KPI Row */}
         <div className="grid grid-cols-4 gap-3">

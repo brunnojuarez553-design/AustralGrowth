@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ data: projects })
   } catch (error) {
     console.error('GET /api/projects error:', error)
-    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
+    return NextResponse.json({ error: 'Error interno', debug: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }
 
@@ -75,6 +75,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Datos inválidos', details: error.errors }, { status: 400 })
     }
     console.error('POST /api/projects error:', error)
-    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
+    return NextResponse.json({ error: 'Error interno', debug: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }
