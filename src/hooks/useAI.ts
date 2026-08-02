@@ -24,7 +24,10 @@ export function useDirectorAI() {
         body: JSON.stringify({ messages: newMessages }),
       })
 
-      if (!res.ok) throw new Error('AI request failed')
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.debug ?? err.error ?? 'AI request failed')
+      }
 
       const reader = res.body?.getReader()
       if (!reader) return
@@ -54,9 +57,10 @@ export function useDirectorAI() {
         }
       }
     } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Error desconocido'
       setMessages(prev => [
         ...prev.slice(0, -1),
-        { role: 'assistant', content: 'Error al procesar la respuesta. Intentá de nuevo.' },
+        { role: 'assistant', content: `Error al procesar la respuesta: ${msg}` },
       ])
     } finally {
       setIsStreaming(false)

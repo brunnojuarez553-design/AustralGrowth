@@ -7,8 +7,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { prisma } from '@/lib/prisma'
 
-export const runtime = 'edge'
-
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient()
