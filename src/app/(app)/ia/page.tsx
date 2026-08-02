@@ -24,7 +24,7 @@ export default function IAPage() {
     <>
       <Topbar title="IA Comercial" subtitle="Insights en tiempo real · Generador de mensajes" />
       <div className="flex-1 overflow-y-auto p-5 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="space-y-3">
             <div className="bg-[rgba(245,158,11,0.06)] border border-[rgba(245,158,11,0.18)] rounded-[10px] p-4">
               <div className="flex items-center gap-2 mb-3">

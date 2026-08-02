@@ -80,7 +80,7 @@ export function ProjectFormModal({ open, onClose }: Props) {
         <Field label="Descripción">
           <Textarea rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
         </Field>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Vincular a un lead">
             <Select value={form.leadId} onChange={e => setForm(f => ({ ...f, leadId: e.target.value }))}>
               <option value="">— Ninguno —</option>

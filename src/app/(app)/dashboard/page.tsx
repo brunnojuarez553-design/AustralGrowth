@@ -45,7 +45,7 @@ export default function DashboardPage() {
         )}
 
         {/* KPI Row */}
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
             { label: 'Facturación mes', value: formatCurrency(m?.monthlyRevenue ?? 0), change: '+23%', up: true, icon: 'ti-coin' },
             { label: 'Objetivo mensual', value: formatCurrency(m?.monthlyGoal ?? 0), progress: m?.monthlyGoalProgress ?? 0, icon: 'ti-target' },
@@ -74,7 +74,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Charts Row */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {/* Funnel */}
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] p-4">
             <div className="text-[13px] font-semibold text-[var(--text)] mb-4">Embudo de conversión</div>
@@ -106,7 +106,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Bottom Row */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {/* Follow-ups */}
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] p-4">
             <div className="flex items-center gap-2 mb-4">

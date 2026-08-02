@@ -23,9 +23,9 @@ export default function DirectorPage() {
   return (
     <>
       <Topbar title="Director Comercial IA" subtitle="Tu socio estratégico de ventas" />
-      <div className="flex-1 overflow-hidden flex gap-4 p-5">
+      <div className="flex-1 overflow-hidden flex flex-col lg:flex-row gap-4 p-3 md:p-5 overflow-y-auto lg:overflow-y-hidden">
         {/* Left: metrics + insights */}
-        <div className="w-[280px] shrink-0 space-y-3 overflow-y-auto">
+        <div className="w-full lg:w-[280px] lg:shrink-0 space-y-3 lg:overflow-y-auto shrink-0">
           <div className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[10px] p-4">
             <div className="text-[10.5px] text-[var(--text-3)] mb-1">Proyección mensual</div>
             <div className="text-[26px] font-bold text-[var(--green)] font-mono">$7.200</div>
@@ -76,7 +76,7 @@ export default function DirectorPage() {
         </div>
 
         {/* Right: chat */}
-        <div className="flex-1 flex flex-col bg-[var(--surface)] border border-[var(--border)] rounded-[10px] overflow-hidden">
+        <div className="flex-1 flex flex-col bg-[var(--surface)] border border-[var(--border)] rounded-[10px] overflow-hidden min-h-[480px] lg:min-h-0">
           <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-[var(--green)] animate-pulse" />
             <span className="text-[12.5px] font-medium text-[var(--text)]">Director Comercial IA</span>

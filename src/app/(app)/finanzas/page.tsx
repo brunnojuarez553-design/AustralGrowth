@@ -73,7 +73,7 @@ export default function FinanzasPage() {
     <>
       <Topbar title="Finanzas" subtitle="Control financiero completo" primaryAction={{ label: 'Registrar movimiento', onClick: openCreate }} />
       <div className="flex-1 overflow-y-auto p-5 space-y-4">
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
             { label: 'Facturación mes', value: formatCurrency(summary.totalIncome), color: 'var(--text)', icon: 'ti-coin' },
             { label: 'Cobrado', value: formatCurrency(summary.totalIncome - (summary.pending ?? 0)), color: 'var(--text)', icon: 'ti-check' },
@@ -89,7 +89,7 @@ export default function FinanzasPage() {
           ))}
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] p-4">
             <div className="text-[13px] font-semibold text-[var(--text)] mb-4">Movimientos · {new Date().toLocaleDateString('es', { month: 'long', year: 'numeric' })}</div>
             <div className="space-y-0 max-h-[340px] overflow-y-auto">
@@ -141,7 +141,7 @@ export default function FinanzasPage() {
               </AreaChart>
             </ResponsiveContainer>
 
-            <div className="mt-4 grid grid-cols-3 gap-3 border-t border-[var(--border)] pt-4">
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-[var(--border)] pt-4">
               <div className="text-center">
                 <div className="text-[10px] text-[var(--text-3)]">Margen neto</div>
                 <div className="text-[15px] font-bold text-[var(--green)] font-mono">{Math.round(summary.margin ?? 0)}%</div>

@@ -111,7 +111,7 @@ export function FinanceFormModal({ open, onClose, entry }: Props) {
         <Field label="Categoría *">
           <Input required placeholder="Ej: Proyecto web, Herramientas, etc." value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} />
         </Field>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Monto (USD) *">
             <Input required type="number" min="0" step="0.01" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
           </Field>

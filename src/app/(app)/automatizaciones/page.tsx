@@ -74,7 +74,7 @@ export default function AutomatizacionesPage() {
         {automations.map(a => (
           <div key={a.id} className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] p-4 flex items-center gap-4">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <span className="text-[13px] font-semibold text-[var(--text)]">{a.name}</span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-[rgba(249,115,22,0.15)] text-[#FDBA74] font-medium">
                   {TRIGGER_LABELS[a.trigger] ?? a.trigger}

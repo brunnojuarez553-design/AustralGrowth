@@ -37,7 +37,7 @@ export default function ProspeccionPage() {
       />
       <div className="flex-1 overflow-y-auto p-5 space-y-4">
         {showForm && (
-          <form onSubmit={handleSubmit} className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] p-4 grid grid-cols-3 gap-3">
+          <form onSubmit={handleSubmit} className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input required placeholder="Empresa *" value={form.companyName}
               onChange={e => setForm(f => ({ ...f, companyName: e.target.value }))}
               className="bg-[var(--surface-2)] border border-[var(--border-2)] rounded-[7px] px-3 py-2 text-[12.5px] text-[var(--text)] outline-none focus:border-[var(--accent)]" />
@@ -60,7 +60,8 @@ export default function ProspeccionPage() {
           </form>
         )}
 
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] overflow-hidden">
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] overflow-x-auto">
+          <div className="min-w-[560px]">
           <div className="grid grid-cols-[1fr_140px_140px_120px] gap-3 px-4 py-2.5 border-b border-[var(--border)] text-[10.5px] font-semibold uppercase tracking-wide text-[var(--text-3)]">
             <span>Empresa / Contacto</span>
             <span>Origen</span>
@@ -89,6 +90,7 @@ export default function ProspeccionPage() {
               <div className="text-[11.5px] text-[var(--text-3)] self-center">{formatRelativeTime(lead.createdAt)}</div>
             </div>
           ))}
+          </div>
         </div>
       </div>
     </>

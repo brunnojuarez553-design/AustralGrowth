@@ -39,7 +39,7 @@ export default function PropuestasPage() {
         primaryAction={{ label: 'Nueva propuesta', onClick: () => {} }}
       />
       <div className="flex-1 overflow-y-auto p-5 space-y-4">
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
             { label: 'Valor total', value: formatCurrency(totalValue) },
             { label: 'Pendientes de respuesta', value: String(pending.length) },
@@ -53,7 +53,8 @@ export default function PropuestasPage() {
           ))}
         </div>
 
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] overflow-hidden">
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] overflow-x-auto">
+          <div className="min-w-[620px]">
           <div className="grid grid-cols-[1fr_140px_110px_110px_110px] gap-3 px-4 py-2.5 border-b border-[var(--border)] text-[10.5px] font-semibold uppercase tracking-wide text-[var(--text-3)]">
             <span>Cliente / Propuesta</span>
             <span>Monto</span>
@@ -103,6 +104,7 @@ export default function PropuestasPage() {
               </div>
             )
           })}
+          </div>
         </div>
       </div>
     </>

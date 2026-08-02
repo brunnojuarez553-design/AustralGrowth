@@ -101,7 +101,7 @@ export function LeadFormModal({ open, onClose, lead }: Props) {
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Empresa *">
             <Input required value={form.companyName} onChange={e => set('companyName', e.target.value)} />
           </Field>

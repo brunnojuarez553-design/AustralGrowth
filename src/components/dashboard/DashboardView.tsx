@@ -36,7 +36,7 @@ export function DashboardView() {
   return (
     <div className="space-y-3.5 fade-in">
       {/* Metric row */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <MetricCard
           label="Facturación mensual"
           value={formatCurrency(stats.monthlyRevenue)}
@@ -68,7 +68,7 @@ export function DashboardView() {
       </div>
 
       {/* Second row: funnel + revenue */}
-      <div className="grid grid-cols-2 gap-3.5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
         <Card>
           <CardHeader title="Embudo de conversión" subtitle="Leads del mes actual" />
           <FunnelChart />
@@ -80,7 +80,7 @@ export function DashboardView() {
       </div>
 
       {/* Third row: upcoming + AI */}
-      <div className="grid grid-cols-2 gap-3.5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
         <Card>
           <CardHeader title="Próximos seguimientos">
             <Tag variant="amber">5 hoy</Tag>
@@ -109,7 +109,7 @@ export function DashboardView() {
       </div>
 
       {/* Pipeline value + avg ticket */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <MetricCard label="Valor en pipeline" value={formatCurrency(stats.pipelineValue)} icon={<Flame size={12} />} variant="success" />
         <MetricCard label="Ticket promedio" value={formatCurrency(stats.avgTicket)} icon={<DollarSign size={12} />} />
         <MetricCard label="Propuestas activas" value={String(stats.proposalsSent)} changeLabel="Esperando respuesta" icon={<Clock size={12} />} />

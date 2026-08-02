@@ -3,7 +3,9 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { cn, getInitials } from '@/lib/utils'
+import { cn } from '@/lib/utils'
+import { useSidebar } from './SidebarContext'
+import { X } from 'lucide-react'
 
 const navItems = [
   { group: 'Principal', items: [
@@ -28,74 +30,101 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const { isOpen, close } = useSidebar()
 
   return (
-    <aside className="w-[220px] min-w-[220px] bg-[var(--surface)] border-r border-[var(--border)] flex flex-col h-screen sticky top-0">
-      {/* Logo */}
-      <div className="px-4 py-[18px] border-b border-[var(--border)] flex items-center gap-2.5">
-        <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
-          <div className="absolute inset-0 rounded-[8px] bg-[var(--accent)] opacity-20 blur-[6px]" />
-          <Image
-            src="https://res.cloudinary.com/dgp7uhps3/image/upload/v1784260223/logo_austral_web_studio_wcitrd.png"
-            alt="Austral Web Studio"
-            width={32}
-            height={32}
-            className="relative object-contain"
-            priority
-          />
-        </div>
-        <div>
-          <div className="text-[13px] font-semibold text-[var(--text)] tracking-tight">Austral Growth</div>
-          <div className="text-[10px] text-[var(--text-3)] font-mono">v2.1 · OS</div>
-        </div>
-      </div>
+    <>
+      {/* Overlay oscuro detrás del drawer, solo en mobile */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-40 md:hidden"
+          onClick={close}
+          aria-hidden="true"
+        />
+      )}
 
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto p-2 space-y-1">
-        {navItems.map(group => (
-          <div key={group.group}>
-            <div className="text-[10px] font-semibold text-[var(--text-3)] tracking-[0.08em] uppercase px-2 py-2 mt-2">
-              {group.group}
+      <aside
+        className={cn(
+          'w-[240px] min-w-[240px] bg-[var(--surface)] border-r border-[var(--border)] flex flex-col h-screen',
+          'fixed md:sticky top-0 left-0 z-50 md:z-auto transition-transform duration-200',
+          'md:translate-x-0',
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        {/* Logo */}
+        <div className="px-4 py-[18px] border-b border-[var(--border)] flex items-center gap-2.5">
+          <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
+            <div className="absolute inset-0 rounded-[8px] bg-[var(--accent)] opacity-20 blur-[6px]" />
+            <Image
+              src="https://res.cloudinary.com/dgp7uhps3/image/upload/v1784260223/logo_austral_web_studio_wcitrd.png"
+              alt="Austral Web Studio"
+              width={32}
+              height={32}
+              className="relative object-contain"
+              priority
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[13px] font-semibold text-[var(--text)] tracking-tight truncate">Austral Growth</div>
+            <div className="text-[10px] text-[var(--text-3)] font-mono">v2.1 · OS</div>
+          </div>
+          <button
+            onClick={close}
+            className="md:hidden p-1.5 rounded-[6px] text-[var(--text-3)] hover:bg-[var(--surface-3)]"
+            aria-label="Cerrar menú"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto p-2 space-y-1">
+          {navItems.map(group => (
+            <div key={group.group}>
+              <div className="text-[10px] font-semibold text-[var(--text-3)] tracking-[0.08em] uppercase px-2 py-2 mt-2">
+                {group.group}
+              </div>
+              {group.items.map(item => {
+                const isActive = pathname.startsWith(item.href)
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={close}
+                    className={cn(
+                      'flex items-center gap-[9px] px-2 py-[9px] md:py-[7px] rounded-[7px] text-[13px] md:text-[12.5px] font-normal transition-all duration-150 mb-[1px]',
+                      isActive
+                        ? 'bg-[rgba(249,115,22,0.15)] text-[#FDBA74] font-medium'
+                        : 'text-[var(--text-2)] hover:bg-[var(--surface-3)] hover:text-[var(--text)]'
+                    )}
+                  >
+                    <i className={`ti ${item.icon} text-[15px] w-4 text-center`} aria-hidden="true" />
+                    <span>{item.label}</span>
+                    {item.aiBadge && (
+                      <span className="ml-auto text-[9px] bg-[rgba(245,158,11,0.15)] text-[var(--amber)] rounded-full px-[5px] py-[1px] font-semibold border border-[rgba(245,158,11,0.2)]">
+                        IA
+                      </span>
+                    )}
+                  </Link>
+                )
+              })}
             </div>
-            {group.items.map(item => {
-              const isActive = pathname.startsWith(item.href)
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    'flex items-center gap-[9px] px-2 py-[7px] rounded-[7px] text-[12.5px] font-normal transition-all duration-150 mb-[1px]',
-                    isActive
-                      ? 'bg-[rgba(249,115,22,0.15)] text-[#FDBA74] font-medium'
-                      : 'text-[var(--text-2)] hover:bg-[var(--surface-3)] hover:text-[var(--text)]'
-                  )}
-                >
-                  <i className={`ti ${item.icon} text-[15px] w-4 text-center`} aria-hidden="true" />
-                  <span>{item.label}</span>
-                  {item.aiBadge && (
-                    <span className="ml-auto text-[9px] bg-[rgba(245,158,11,0.15)] text-[var(--amber)] rounded-full px-[5px] py-[1px] font-semibold border border-[rgba(245,158,11,0.2)]">
-                      IA
-                    </span>
-                  )}
-                </Link>
-              )
-            })}
-          </div>
-        ))}
-      </nav>
+          ))}
+        </nav>
 
-      {/* Footer */}
-      <div className="p-2 border-t border-[var(--border)]">
-        <div className="flex items-center gap-2 px-2 py-[7px] rounded-[7px] cursor-pointer hover:bg-[var(--surface-3)]">
-          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[var(--accent)] to-[#F59E0B] flex items-center justify-center text-[11px] font-semibold text-white">
-            BM
-          </div>
-          <div>
-            <p className="text-[12px] font-medium text-[var(--text)]">Bruno M.</p>
-            <span className="text-[10px] text-[var(--text-3)]">Austral Web Studio</span>
+        {/* Footer */}
+        <div className="p-2 border-t border-[var(--border)]">
+          <div className="flex items-center gap-2 px-2 py-[7px] rounded-[7px] cursor-pointer hover:bg-[var(--surface-3)]">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[var(--accent)] to-[#F59E0B] flex items-center justify-center text-[11px] font-semibold text-white shrink-0">
+              BM
+            </div>
+            <div className="min-w-0">
+              <p className="text-[12px] font-medium text-[var(--text)] truncate">Bruno M.</p>
+              <span className="text-[10px] text-[var(--text-3)] truncate">Austral Web Studio</span>
+            </div>
           </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   )
 }

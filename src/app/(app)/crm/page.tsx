@@ -136,7 +136,7 @@ export default function CRMPage() {
     <>
       <Topbar title="CRM Pipeline" subtitle={`${summary.totalLeads ?? 0} leads activos · Arrastrá para cambiar de etapa`} primaryAction={{ label: 'Nuevo lead', onClick: openCreate }} />
       <div className="flex-1 overflow-hidden flex flex-col p-5 gap-4">
-        <div className="grid grid-cols-4 gap-3 shrink-0">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
           {[
             { label: 'Valor en pipeline', value: formatCurrency(summary.totalPipelineValue ?? 0) },
             { label: 'Leads calientes', value: String(summary.hotLeads ?? 0) },

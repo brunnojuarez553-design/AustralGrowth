@@ -20,7 +20,7 @@ export default function MetricasPage() {
     <>
       <Topbar title="Centro de Métricas" subtitle="Rendimiento comercial completo" primaryAction={{ label: 'Exportar reporte', onClick: () => {} }} />
       <div className="flex-1 overflow-y-auto p-5 space-y-4">
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
             { label: 'Conversión total', value: '31%' },
             { label: 'Tiempo prom. cierre', value: '18 días' },
@@ -33,13 +33,13 @@ export default function MetricasPage() {
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] p-4">
             <div className="text-[13px] font-semibold text-[var(--text)] mb-4">Conversión por rubro</div>
             <div className="space-y-0">
               {byIndustry.map(item => (
                 <div key={item.label} className="flex items-center gap-3 py-[7px] border-b border-[var(--border)] last:border-0">
-                  <div className="w-[110px] text-[12px] text-[var(--text-2)] shrink-0">{item.label}</div>
+                  <div className="w-[85px] sm:w-[110px] text-[11px] sm:text-[12px] text-[var(--text-2)] shrink-0 truncate">{item.label}</div>
                   <div className="flex-1 h-[5px] bg-[var(--surface-3)] rounded-full overflow-hidden">
                     <div className="h-full rounded-full" style={{ width: `${item.pct}%`, background: item.color }} />
                   </div>
@@ -53,7 +53,7 @@ export default function MetricasPage() {
             <div className="space-y-0">
               {byStage.map(item => (
                 <div key={item.label} className="flex items-center gap-3 py-[7px] border-b border-[var(--border)] last:border-0">
-                  <div className="w-[160px] text-[12px] text-[var(--text-2)] shrink-0">{item.label}</div>
+                  <div className="w-[120px] sm:w-[160px] text-[11px] sm:text-[12px] text-[var(--text-2)] shrink-0 truncate">{item.label}</div>
                   <div className="flex-1 h-[5px] bg-[var(--surface-3)] rounded-full overflow-hidden">
                     <div className="h-full rounded-full bg-[var(--accent)]" style={{ width: `${item.pct}%` }} />
                   </div>
