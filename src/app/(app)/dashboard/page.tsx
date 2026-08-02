@@ -142,22 +142,28 @@ export default function DashboardPage() {
               </div>
               <div>
                 <div className="text-[12.5px] font-semibold text-[var(--text)]">IA Comercial · Alertas</div>
-                <div className="text-[10.5px] text-[var(--text-3)]">Actualizado hace 12 min</div>
+                <div className="text-[10.5px] text-[var(--text-3)]">Calculado en base a tu pipeline actual</div>
               </div>
             </div>
             <div className="space-y-2">
-              {[
-                { icon: 'ti-flame', color: 'rgba(249,115,22,0.15)', iconColor: '#FDBA74', text: <><strong className="text-[var(--text)]">6 leads calientes</strong> con alta probabilidad de cierre. WitcherTorque lidera con 84%.</> },
-                { icon: 'ti-clock', color: 'rgba(245,158,11,0.15)', iconColor: 'var(--amber)', text: <><strong className="text-[var(--text)]">Hace 5 días</strong> sin contacto con Instaservice Panama. Riesgo de enfriamiento.</> },
-                { icon: 'ti-trending-up', color: 'rgba(16,185,129,0.15)', iconColor: 'var(--green)', text: <>Tu tasa de cierre <strong className="text-[var(--text)]">mejora 12% los martes</strong>. Agendá demos hoy.</> },
-              ].map((item, i) => (
-                <div key={i} className="flex items-start gap-2 py-2 border-b border-[rgba(245,158,11,0.1)] last:border-0 last:pb-0">
-                  <div className="w-[22px] h-[22px] rounded-[5px] flex items-center justify-center text-[12px] shrink-0 mt-[1px]" style={{ background: item.color, color: item.iconColor }}>
-                    <i className={`ti ${item.icon}`} aria-hidden="true" />
+              {(m?.alerts ?? []).map((alert, i) => {
+                const meta = {
+                  hot:    { icon: 'ti-flame', color: 'rgba(249,115,22,0.15)', iconColor: '#FDBA74' },
+                  stale:  { icon: 'ti-clock', color: 'rgba(245,158,11,0.15)', iconColor: 'var(--amber)' },
+                  insight:{ icon: 'ti-trending-up', color: 'rgba(16,185,129,0.15)', iconColor: 'var(--green)' },
+                  empty:  { icon: 'ti-info-circle', color: 'rgba(148,163,184,0.15)', iconColor: 'var(--text-3)' },
+                }[alert.type]
+                return (
+                  <div key={i} className="flex items-start gap-2 py-2 border-b border-[rgba(245,158,11,0.1)] last:border-0 last:pb-0">
+                    <div className="w-[22px] h-[22px] rounded-[5px] flex items-center justify-center text-[12px] shrink-0 mt-[1px]" style={{ background: meta.color, color: meta.iconColor }}>
+                      <i className={`ti ${meta.icon}`} aria-hidden="true" />
+                    </div>
+                    <div className="text-[12px] text-[var(--text-2)] leading-[1.5]" dangerouslySetInnerHTML={{
+                      __html: alert.text.replace(/\*\*(.+?)\*\*/g, '<strong class="text-[var(--text)]">$1</strong>'),
+                    }} />
                   </div>
-                  <div className="text-[12px] text-[var(--text-2)] leading-[1.5]">{item.text}</div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         </div>

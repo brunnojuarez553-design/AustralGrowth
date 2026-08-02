@@ -63,6 +63,12 @@ export interface DashboardMetrics {
   funnelData: FunnelStage[]
   monthlyChart: MonthlyData[]
   revenueByIndustry: IndustryData[]
+  alerts: DashboardAlert[]
+}
+
+export interface DashboardAlert {
+  type: 'hot' | 'stale' | 'insight' | 'empty'
+  text: string
 }
 
 export interface FunnelStage {

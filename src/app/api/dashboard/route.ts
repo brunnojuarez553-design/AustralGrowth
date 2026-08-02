@@ -38,8 +38,9 @@ export async function GET(req: NextRequest) {
       prisma.lead.findMany({
         where: { workspaceId },
         select: {
-          stage: true, industry: true, estimatedValue: true,
+          stage: true, industry: true, estimatedValue: true, probability: true,
           isHot: true, createdAt: true, closedAt: true,
+          companyName: true, lastContactedAt: true,
         },
       }),
       prisma.finance.aggregate({
@@ -145,6 +146,54 @@ export async function GET(req: NextRequest) {
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 5)
 
+    // Alertas reales, calculadas en base a los datos del workspace (nada hardcodeado)
+    type Alert = { type: 'hot' | 'stale' | 'insight' | 'empty'; text: string }
+    const alerts: Alert[] = []
+
+    const hotLeadsList = allLeads.filter(l => l.isHot && !['WON', 'LOST'].includes(l.stage))
+    if (hotLeadsList.length > 0) {
+      const best = [...hotLeadsList].sort((a, b) => (b.probability ?? 0) - (a.probability ?? 0))[0]
+      alerts.push({
+        type: 'hot',
+        text: best.probability
+          ? `${hotLeadsList.length} lead${hotLeadsList.length > 1 ? 's' : ''} caliente${hotLeadsList.length > 1 ? 's' : ''} con alta probabilidad de cierre. **${best.companyName}** lidera con **${best.probability}%**.`
+          : `${hotLeadsList.length} lead${hotLeadsList.length > 1 ? 's' : ''} marcado${hotLeadsList.length > 1 ? 's' : ''} como caliente${hotLeadsList.length > 1 ? 's' : ''}. Priorizalos esta semana.`,
+      })
+    }
+
+    const staleLeads = allLeads.filter(l => {
+      if (['WON', 'LOST'].includes(l.stage)) return false
+      if (!l.lastContactedAt) return true
+      const days = (now.getTime() - new Date(l.lastContactedAt).getTime()) / (1000 * 60 * 60 * 24)
+      return days > 5
+    })
+    if (staleLeads.length > 0) {
+      const oldest = staleLeads[0]
+      alerts.push({
+        type: 'stale',
+        text: staleLeads.length === 1
+          ? `**${oldest.companyName}** sin contacto hace más de 5 días. Riesgo de enfriamiento.`
+          : `**${staleLeads.length} leads** sin contacto hace más de 5 días. Riesgo de enfriamiento.`,
+      })
+    }
+
+    if (monthlyRevenue < workspace.monthlyGoal) {
+      const missing = workspace.monthlyGoal - monthlyRevenue
+      const pipelineValue = activeLeads.reduce((s, l) => s + ((l.estimatedValue ?? 0) * ((l.probability ?? 0) / 100)), 0)
+      alerts.push({
+        type: 'insight',
+        text: pipelineValue > 0
+          ? `Te faltan **$${Math.round(missing)}** para el objetivo mensual. Tu pipeline ponderado por probabilidad vale **$${Math.round(pipelineValue)}**.`
+          : `Te faltan **$${Math.round(missing)}** para el objetivo mensual. Todavía no tenés leads con probabilidad cargada.`,
+      })
+    } else if (allLeads.length > 0) {
+      alerts.push({ type: 'insight', text: `¡Objetivo mensual cumplido! Facturaste **$${Math.round(monthlyRevenue)}** este mes.` })
+    }
+
+    if (alerts.length === 0) {
+      alerts.push({ type: 'empty', text: 'Todavía no hay suficientes datos para generar alertas. Cargá tus primeros leads en el CRM.' })
+    }
+
     return NextResponse.json({
       data: {
         monthlyRevenue,
@@ -162,6 +211,7 @@ export async function GET(req: NextRequest) {
         funnelData,
         monthlyChart: monthlyChartData,
         revenueByIndustry,
+        alerts,
       },
     })
   } catch (error) {
