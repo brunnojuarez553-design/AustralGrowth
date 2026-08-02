@@ -12,6 +12,10 @@ async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
   })
   if (!res.ok) {
     const err = await res.json()
+    if (err.details) {
+      const fields = err.details.map((d: { path: string[]; message: string }) => `${d.path.join('.')}: ${d.message}`).join(' · ')
+      throw new Error(`${err.error} (${fields})`)
+    }
     throw new Error(err.debug ? `${err.error}: ${err.debug}` : (err.error ?? 'Request failed'))
   }
   return res.json()

@@ -62,8 +62,10 @@ export function LeadFormModal({ open, onClose, lead }: Props) {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    const website = form.website.trim()
     const payload = {
       ...form,
+      website: website && !/^https?:\/\//i.test(website) ? `https://${website}` : website,
       companySize: form.companySize || undefined,
       estimatedValue: form.estimatedValue ? parseFloat(form.estimatedValue) : undefined,
       probability: form.probability ? parseFloat(form.probability) : undefined,
