@@ -1,7 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Topbar } from '@/components/layout/Topbar'
+import { AutomationFormModal } from '@/components/automatizaciones/AutomationFormModal'
 import { formatRelativeTime } from '@/lib/utils'
 
 interface Automation {
@@ -27,6 +29,7 @@ const TRIGGER_LABELS: Record<string, string> = {
 }
 
 export default function AutomatizacionesPage() {
+  const [modalOpen, setModalOpen] = useState(false)
   const qc = useQueryClient()
   const { data, isLoading } = useQuery({
     queryKey: ['automations'],
@@ -57,7 +60,7 @@ export default function AutomatizacionesPage() {
       <Topbar
         title="Automatizaciones"
         subtitle={`${activeCount} de ${automations.length} activas · ${totalRuns} ejecuciones totales`}
-        primaryAction={{ label: 'Nueva automatización', onClick: () => {} }}
+        primaryAction={{ label: 'Nueva automatización', onClick: () => setModalOpen(true) }}
       />
       <div className="flex-1 overflow-y-auto p-5 space-y-3">
         {isLoading && (
@@ -66,8 +69,8 @@ export default function AutomatizacionesPage() {
 
         {!isLoading && automations.length === 0 && (
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] px-4 py-8 text-center text-[12.5px] text-[var(--text-3)]">
-            Todavía no configuraste ninguna automatización. Se disparan solas cuando pasa algo en tu pipeline
-            (por ejemplo: mover un lead a "Ganado", o que una propuesta sea vista).
+            Todavía no configuraste ninguna automatización. Podés definir reglas (por ejemplo: avisar cuando un lead
+            se enfría, o cuando se gana un negocio) para tenerlas documentadas y accionarlas manualmente.
           </div>
         )}
 
@@ -98,6 +101,8 @@ export default function AutomatizacionesPage() {
           </div>
         ))}
       </div>
+
+      <AutomationFormModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </>
   )
 }

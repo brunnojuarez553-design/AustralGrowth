@@ -73,23 +73,32 @@ export function useDirectorAI() {
 export function useGenerateMessage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedMessage, setGeneratedMessage] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
   const generate = useCallback(async (leadId: string, channel: 'whatsapp' | 'email' | 'call_script', context?: string) => {
     setIsGenerating(true)
     setGeneratedMessage('')
+    setError(null)
     try {
       const res = await fetch('/api/ai/generate-message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ leadId, channel, context }),
       })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.debug ?? err.error ?? 'No se pudo generar el mensaje')
+      }
       const { data } = await res.json()
       setGeneratedMessage(data.message)
       return data.message
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error desconocido')
+      return null
     } finally {
       setIsGenerating(false)
     }
   }, [])
 
-  return { generate, isGenerating, generatedMessage }
+  return { generate, isGenerating, generatedMessage, error }
 }

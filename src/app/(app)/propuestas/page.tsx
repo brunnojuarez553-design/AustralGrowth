@@ -1,7 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Topbar } from '@/components/layout/Topbar'
+import { ProposalFormModal } from '@/components/propuestas/ProposalFormModal'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import type { ProposalWithRelations } from '@/types'
 
@@ -15,6 +17,7 @@ const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }>
 }
 
 export default function PropuestasPage() {
+  const [modalOpen, setModalOpen] = useState(false)
   const { data, isLoading } = useQuery({
     queryKey: ['proposals'],
     queryFn: async () => {
@@ -36,7 +39,7 @@ export default function PropuestasPage() {
       <Topbar
         title="Propuestas"
         subtitle={`${proposals.length} propuestas · ${formatCurrency(totalValue)} en total`}
-        primaryAction={{ label: 'Nueva propuesta', onClick: () => {} }}
+        primaryAction={{ label: 'Nueva propuesta', onClick: () => setModalOpen(true) }}
       />
       <div className="flex-1 overflow-y-auto p-5 space-y-4">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -107,6 +110,8 @@ export default function PropuestasPage() {
           </div>
         </div>
       </div>
+
+      <ProposalFormModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </>
   )
 }

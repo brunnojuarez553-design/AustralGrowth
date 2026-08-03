@@ -190,6 +190,26 @@ export async function GET(req: NextRequest) {
       alerts.push({ type: 'insight', text: `¡Objetivo mensual cumplido! Facturaste **$${Math.round(monthlyRevenue)}** este mes.` })
     }
 
+    // Tiempo promedio de cierre (solo leads ganados con fecha de cierre)
+    const wonLeadsWithCloseDate = allLeads.filter(l => l.stage === 'WON' && l.closedAt)
+    const avgCloseDays = wonLeadsWithCloseDate.length > 0
+      ? wonLeadsWithCloseDate.reduce((sum, l) => sum + (new Date(l.closedAt!).getTime() - new Date(l.createdAt).getTime()) / (1000 * 60 * 60 * 24), 0) / wonLeadsWithCloseDate.length
+      : null
+
+    // ROI comercial: ingresos del mes / gastos del mes
+    const monthlyExpensesTotal = monthlyExpenses._sum.amount ?? 0
+    const roi = monthlyExpensesTotal > 0 ? monthlyRevenue / monthlyExpensesTotal : null
+
+    // Top leads activos por probabilidad de cierre (para IA Comercial y Director)
+    const topLeads = activeLeads
+      .filter(l => (l.probability ?? 0) > 0)
+      .sort((a, b) => (b.probability ?? 0) - (a.probability ?? 0))
+      .slice(0, 5)
+      .map(l => ({ companyName: l.companyName, probability: l.probability ?? 0 }))
+
+    // Valor de pipeline ponderado por probabilidad
+    const weightedPipelineValue = activeLeads.reduce((s, l) => s + ((l.estimatedValue ?? 0) * ((l.probability ?? 0) / 100)), 0)
+
     if (alerts.length === 0) {
       alerts.push({ type: 'empty', text: 'Todavía no hay suficientes datos para generar alertas. Cargá tus primeros leads en el CRM.' })
     }
@@ -201,12 +221,16 @@ export async function GET(req: NextRequest) {
         monthlyGoal: workspace.monthlyGoal,
         yearlyGoal: workspace.yearlyGoal,
         monthlyGoalProgress,
-        monthlyExpenses: monthlyExpenses._sum.amount ?? 0,
+        monthlyExpenses: monthlyExpensesTotal,
         activeLeads: activeLeads.length,
         hotLeads: allLeads.filter(l => l.isHot).length,
         proposalsSent: proposalLeads.length,
         closeRate,
         avgTicket,
+        avgCloseDays,
+        roi,
+        topLeads,
+        weightedPipelineValue,
         upcomingFollowUps,
         funnelData,
         monthlyChart: monthlyChartData,

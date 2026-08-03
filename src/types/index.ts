@@ -59,6 +59,10 @@ export interface DashboardMetrics {
   proposalsSent: number
   closeRate: number
   avgTicket: number
+  avgCloseDays: number | null
+  roi: number | null
+  topLeads: { companyName: string; probability: number }[]
+  weightedPipelineValue: number
   upcomingFollowUps: LeadWithRelations[]
   funnelData: FunnelStage[]
   monthlyChart: MonthlyData[]
