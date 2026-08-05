@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useDashboard } from '@/hooks/useDashboard'
 import { useGenerateMessage } from '@/hooks/useAI'
+import { BoldText } from '@/components/ui/BoldText'
 
 const PROB_COLOR = (p: number) => p >= 75 ? 'var(--green)' : p >= 50 ? '#FDBA74' : p >= 25 ? 'var(--amber)' : '#FCA5A5'
 const initials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '—'
@@ -54,7 +55,7 @@ export default function IAPage() {
                 return (
                   <div key={i} className="flex items-start gap-2 py-[7px] border-b border-[rgba(245,158,11,0.1)] last:border-0 last:pb-0">
                     <div className="w-[22px] h-[22px] rounded-[5px] flex items-center justify-center text-[11px] shrink-0 mt-[2px]" style={{ background: meta.bg, color: meta.c }}><i className={`ti ${meta.icon}`} aria-hidden="true" /></div>
-                    <p className="text-[12px] text-[var(--text-2)] leading-[1.5]" dangerouslySetInnerHTML={{ __html: alert.text.replace(/\*\*(.+?)\*\*/g, '<strong class="text-[var(--text)]">$1</strong>') }} />
+                    <BoldText text={alert.text} className="text-[12px] text-[var(--text-2)] leading-[1.5]" />
                   </div>
                 )
               })}

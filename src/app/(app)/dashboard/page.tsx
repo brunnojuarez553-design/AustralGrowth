@@ -5,6 +5,7 @@ import { useDashboard } from '@/hooks/useDashboard'
 import { Topbar } from '@/components/layout/Topbar'
 import { LeadFormModal } from '@/components/crm/LeadFormModal'
 import { GoalRing } from '@/components/dashboard/GoalRing'
+import { BoldText } from '@/components/ui/BoldText'
 import { formatCurrency, formatRelativeTime } from '@/lib/utils'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
@@ -172,9 +173,7 @@ export default function DashboardPage() {
                     <div className="w-[22px] h-[22px] rounded-[5px] flex items-center justify-center text-[12px] shrink-0 mt-[1px]" style={{ background: meta.color, color: meta.iconColor }}>
                       <i className={`ti ${meta.icon}`} aria-hidden="true" />
                     </div>
-                    <div className="text-[12px] text-[var(--text-2)] leading-[1.5]" dangerouslySetInnerHTML={{
-                      __html: alert.text.replace(/\*\*(.+?)\*\*/g, '<strong class="text-[var(--text)]">$1</strong>'),
-                    }} />
+                    <BoldText text={alert.text} className="text-[12px] text-[var(--text-2)] leading-[1.5]" />
                   </div>
                 )
               })}

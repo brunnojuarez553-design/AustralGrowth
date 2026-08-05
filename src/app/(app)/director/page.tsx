@@ -5,6 +5,7 @@ import { Topbar } from '@/components/layout/Topbar'
 import { useDirectorAI } from '@/hooks/useAI'
 import { useDashboard } from '@/hooks/useDashboard'
 import { formatCurrency } from '@/lib/utils'
+import { BoldText } from '@/components/ui/BoldText'
 
 const ALERT_META = {
   hot:     { icon: 'ti-flame', bg: 'rgba(249,115,22,0.15)', color: '#FDBA74' },
@@ -58,7 +59,7 @@ export default function DirectorPage() {
                   <div className="w-[22px] h-[22px] rounded-[5px] flex items-center justify-center text-[11px] shrink-0 mt-[1px]" style={{ background: meta.bg, color: meta.color }}>
                     <i className={`ti ${meta.icon}`} aria-hidden="true" />
                   </div>
-                  <p className="text-[11.5px] text-[var(--text-2)] leading-[1.5]" dangerouslySetInnerHTML={{ __html: alert.text.replace(/\*\*(.+?)\*\*/g, '<strong class="text-[var(--text)]">$1</strong>') }} />
+                  <BoldText text={alert.text} className="text-[11.5px] text-[var(--text-2)] leading-[1.5]" />
                 </div>
               )
             })}

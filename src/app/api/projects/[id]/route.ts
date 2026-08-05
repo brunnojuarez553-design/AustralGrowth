@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { z } from 'zod'
+
+const projectUpdateSchema = z.object({
+  leadId: z.string().optional(),
+  name: z.string().min(1).optional(),
+  description: z.string().optional(),
+  status: z.enum(['PLANNING', 'IN_PROGRESS', 'IN_REVIEW', 'COMPLETED', 'ON_HOLD', 'CANCELLED']).optional(),
+  startDate: z.string().datetime().optional(),
+  dueDate: z.string().datetime().optional(),
+})
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -14,17 +24,21 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     const { id } = await params
     const body = await req.json()
+    const validated = projectUpdateSchema.parse(body)
 
     const project = await prisma.project.update({
       where: { id, workspaceId: dbUser.workspaceId },
       data: {
-        ...body,
-        completedAt: body.status === 'COMPLETED' ? new Date() : undefined,
+        ...validated,
+        completedAt: validated.status === 'COMPLETED' ? new Date() : undefined,
       },
     })
 
     return NextResponse.json({ data: project })
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: 'Datos inválidos', details: error.errors }, { status: 400 })
+    }
     console.error('PATCH /api/projects/[id] error:', error)
     return NextResponse.json({ error: 'Error interno', debug: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }

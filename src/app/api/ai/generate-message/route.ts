@@ -20,11 +20,14 @@ export async function POST(req: NextRequest) {
     const user = session?.user
     if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
+    const dbUser = await prisma.user.findUnique({ where: { email: user.email! } })
+    if (!dbUser) return NextResponse.json({ error: 'No encontrado' }, { status: 404 })
+
     const body = await req.json()
     const { leadId, channel, context } = schema.parse(body)
 
     const lead = await prisma.lead.findUnique({
-      where: { id: leadId },
+      where: { id: leadId, workspaceId: dbUser.workspaceId },
       include: {
         notes: { orderBy: { createdAt: 'desc' }, take: 3 },
         activities: { orderBy: { createdAt: 'desc' }, take: 5 },
