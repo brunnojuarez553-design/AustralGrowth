@@ -112,6 +112,17 @@ export async function GET(req: NextRequest) {
       ? (monthlyRevenue / workspace.monthlyGoal) * 100
       : 0
 
+    // Comparativas reales contra el mes anterior (usando los datos que ya trae el gráfico de 6 meses)
+    const currentMonthData = monthlyChartData[monthlyChartData.length - 1]
+    const prevMonthData = monthlyChartData[monthlyChartData.length - 2]
+    const revenueDelta = prevMonthData && prevMonthData.revenue > 0
+      ? ((currentMonthData.revenue - prevMonthData.revenue) / prevMonthData.revenue) * 100
+      : null
+    const newLeadsThisMonth = currentMonthData?.leads ?? 0
+    const newLeadsDelta = prevMonthData && prevMonthData.leads > 0
+      ? newLeadsThisMonth - prevMonthData.leads
+      : null
+
     const stages = ['DETECTED','CONTACTED','REPLIED','MEETING','DEMO','PROPOSAL','NEGOTIATION','WON','LOST']
     const funnelData = stages.map((stage, i) => {
       const count = allLeads.filter(l => l.stage === stage).length
@@ -210,6 +221,20 @@ export async function GET(req: NextRequest) {
     // Valor de pipeline ponderado por probabilidad
     const weightedPipelineValue = activeLeads.reduce((s, l) => s + ((l.estimatedValue ?? 0) * ((l.probability ?? 0) / 100)), 0)
 
+    // Puntaje comercial compuesto (0-100): promedio ponderado de 3 métricas reales.
+    // No es "IA mágica" — es transparente: 40% objetivo mensual, 35% tasa de cierre, 25% proporción de leads calientes.
+    const hotRatio = activeLeads.length > 0 ? (allLeads.filter(l => l.isHot).length / activeLeads.length) * 100 : 0
+    const businessScore = Math.round(
+      Math.min(monthlyGoalProgress, 100) * 0.4 +
+      Math.min(closeRate, 100) * 0.35 +
+      Math.min(hotRatio, 100) * 0.25
+    )
+    const businessScoreBreakdown = [
+      { label: 'Objetivo mensual', value: Math.round(Math.min(monthlyGoalProgress, 100)) },
+      { label: 'Tasa de cierre', value: Math.round(Math.min(closeRate, 100)) },
+      { label: 'Leads calientes', value: Math.round(Math.min(hotRatio, 100)) },
+    ]
+
     if (alerts.length === 0) {
       alerts.push({ type: 'empty', text: 'Todavía no hay suficientes datos para generar alertas. Cargá tus primeros leads en el CRM.' })
     }
@@ -231,6 +256,11 @@ export async function GET(req: NextRequest) {
         roi,
         topLeads,
         weightedPipelineValue,
+        businessScore,
+        businessScoreBreakdown,
+        revenueDelta,
+        newLeadsThisMonth,
+        newLeadsDelta,
         upcomingFollowUps,
         funnelData,
         monthlyChart: monthlyChartData,
@@ -240,6 +270,6 @@ export async function GET(req: NextRequest) {
     })
   } catch (error) {
     console.error('GET /api/dashboard error:', error)
-    return NextResponse.json({ error: 'Error interno', debug: error instanceof Error ? error.message : String(error) }, { status: 500 })
+    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }

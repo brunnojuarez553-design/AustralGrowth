@@ -8,7 +8,7 @@ export async function POST() {
     const { data: { session }, error: authError } = await supabase.auth.getSession()
     const user = session?.user
     if (!user || !user.email) {
-      return NextResponse.json({ error: 'No autorizado', debug: authError?.message ?? 'sin usuario' }, { status: 401 })
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
     const existing = await prisma.user.findUnique({ where: { email: user.email } })

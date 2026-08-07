@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ data: leads, total, page, limit })
   } catch (error) {
     console.error('GET /api/leads error:', error)
-    return NextResponse.json({ error: 'Error interno', debug: error instanceof Error ? error.message : String(error) }, { status: 500 })
+    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }
 
@@ -131,6 +131,6 @@ export async function POST(req: NextRequest) {
     }
     console.error('POST /api/leads error:', error)
     const message = error instanceof Error ? error.message : 'Error interno'
-    return NextResponse.json({ error: 'Error interno', debug: message }, { status: 500 })
+    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }

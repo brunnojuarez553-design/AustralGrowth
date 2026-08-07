@@ -63,6 +63,11 @@ export interface DashboardMetrics {
   roi: number | null
   topLeads: { companyName: string; probability: number }[]
   weightedPipelineValue: number
+  businessScore: number
+  businessScoreBreakdown: { label: string; value: number }[]
+  revenueDelta: number | null
+  newLeadsThisMonth: number
+  newLeadsDelta: number | null
   upcomingFollowUps: LeadWithRelations[]
   funnelData: FunnelStage[]
   monthlyChart: MonthlyData[]

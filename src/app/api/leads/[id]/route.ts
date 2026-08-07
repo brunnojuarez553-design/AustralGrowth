@@ -62,7 +62,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: 'Datos inválidos', details: error.errors }, { status: 400 })
     }
     console.error("[LEAD PATCH]", error);
-    return NextResponse.json({ error: "Internal error", debug: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
