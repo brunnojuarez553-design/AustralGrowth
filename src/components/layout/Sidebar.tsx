@@ -52,21 +52,20 @@ export function Sidebar() {
         )}
       >
         {/* Logo */}
-        <div className="px-4 py-[18px] border-b border-[var(--border)] flex items-center gap-2.5">
-          <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
-            <div className="absolute inset-0 rounded-[8px] bg-[var(--accent)] opacity-20 blur-[6px]" />
+        <div className="px-4 py-[16px] border-b border-[var(--border)] flex items-center gap-2.5">
+          <div className="relative w-7 h-7 flex items-center justify-center shrink-0">
             <Image
               src="https://res.cloudinary.com/dgp7uhps3/image/upload/v1784260223/logo_austral_web_studio_wcitrd.png"
               alt="Austral Web Studio"
-              width={32}
-              height={32}
+              width={28}
+              height={28}
               className="relative object-contain"
               priority
             />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-[13px] font-semibold text-[var(--text)] tracking-tight truncate">Austral Growth</div>
-            <div className="text-[10px] text-[var(--text-3)] font-mono">v2.1 · OS</div>
+            <div className="text-[12.5px] font-semibold text-[var(--text)] tracking-tight truncate">Austral Growth</div>
+            <div className="text-[9.5px] text-[var(--text-3)] font-mono">v2.1 · OS</div>
           </div>
           <button
             onClick={close}
@@ -75,6 +74,24 @@ export function Sidebar() {
           >
             <X size={18} />
           </button>
+        </div>
+
+        {/* Studio card */}
+        <div className="px-3 pt-3">
+          <div className="relative rounded-[11px] p-3 overflow-hidden border border-[rgba(249,115,22,0.18)]" style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.10) 0%, var(--surface-2) 70%)' }}>
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-[9px] bg-[var(--accent)] flex items-center justify-center text-white text-[15px] font-bold shrink-0">
+                A
+              </div>
+              <div className="min-w-0">
+                <div className="text-[12px] font-semibold text-white truncate">Austral Web Studio</div>
+                <div className="flex items-center gap-1 text-[10px] text-[var(--text-3)]">
+                  <i className="ti ti-map-pin text-[10px]" aria-hidden="true" />
+                  Ushuaia, Argentina
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Nav */}

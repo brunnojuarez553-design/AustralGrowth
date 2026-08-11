@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useDashboard } from '@/hooks/useDashboard'
 import { Topbar } from '@/components/layout/Topbar'
 import { LeadFormModal } from '@/components/crm/LeadFormModal'
-import { ScoreRing } from '@/components/dashboard/ScoreRing'
+import { ScoreRing, statusFor } from '@/components/dashboard/ScoreRing'
 import { BoldText } from '@/components/ui/BoldText'
 import { formatCurrency, formatRelativeTime } from '@/lib/utils'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
@@ -117,7 +117,7 @@ export default function DashboardPage() {
                 </span>
               )}
             </div>
-            <h1 className="text-[26px] md:text-[30px] font-bold text-[var(--text)] tracking-tight" suppressHydrationWarning>
+            <h1 className="text-[28px] md:text-[34px] font-bold text-[var(--text)] tracking-tight" suppressHydrationWarning>
               {now ? greetingWord(now.getHours()) : 'Hola'}, Bruno.
             </h1>
             <p className="text-[13px] text-[var(--text-3)] mt-1">Austral está siguiendo tu pipeline y facturación en tiempo real.</p>
@@ -130,14 +130,15 @@ export default function DashboardPage() {
         </div>
 
         {/* Hero: Austral Intelligence */}
-        <div className="rounded-[18px] p-6 md:p-7 border border-[rgba(249,115,22,0.18)] overflow-hidden relative" style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.10) 0%, var(--surface-2) 55%)' }}>
+        <div className="rounded-[20px] p-6 md:p-8 border border-[rgba(249,115,22,0.18)] overflow-hidden relative" style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.12) 0%, var(--surface-2) 55%)', boxShadow: '0 1px 0 0 rgba(249,115,22,0.25) inset, 0 20px 60px -20px rgba(249,115,22,0.15)' }}>
+          <div className="absolute top-0 left-[10%] right-[10%] h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(249,115,22,0.5), transparent)' }} aria-hidden="true" />
           <div className="flex flex-col lg:flex-row gap-7">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-[6px] bg-[var(--accent)] flex items-center justify-center text-white text-[13px] font-bold">+</div>
                 <span className="text-[10.5px] font-semibold text-[#FDBA74] tracking-[0.1em] uppercase">Austral Intelligence</span>
               </div>
-              <h2 className="text-[24px] md:text-[30px] font-bold text-white leading-[1.25] tracking-tight mb-2">
+              <h2 className="text-[30px] md:text-[42px] font-bold text-white leading-[1.12] tracking-tight mb-3">
                 {goalMet ? (
                   <>Superaste tu objetivo con <span className="text-[#FDBA74]">{formatCurrency(m?.monthlyRevenue ?? 0)}</span> este mes.</>
                 ) : (
@@ -172,11 +173,22 @@ export default function DashboardPage() {
             </div>
 
             {/* Score panel */}
-            <div className="lg:w-[260px] lg:shrink-0 bg-black/20 border border-white/[0.06] rounded-[14px] p-5 flex flex-col items-center">
-              <div className="w-full flex items-center justify-between mb-4">
-                <span className="text-[10px] font-semibold text-[var(--text-3)] tracking-[0.08em] uppercase">Puntaje comercial</span>
+            <div className="lg:w-[270px] lg:shrink-0 bg-black/20 border border-white/[0.06] rounded-[14px] p-5 flex flex-col items-center">
+              <div className="w-full flex items-start justify-between mb-5">
+                <div>
+                  <div className="text-[9.5px] font-semibold text-[var(--text-3)] tracking-[0.1em] uppercase mb-[3px]">Salud comercial</div>
+                  <div className="text-[13px] font-semibold text-white">Puntaje comercial</div>
+                </div>
+                {m && (() => {
+                  const status = statusFor(m.businessScore)
+                  return (
+                    <span className="text-[9.5px] font-semibold px-2 py-[3px] rounded-full whitespace-nowrap shrink-0" style={{ background: status.bg, color: status.color }}>
+                      {status.label}
+                    </span>
+                  )
+                })()}
               </div>
-              <ScoreRing score={m?.businessScore ?? 0} />
+              <ScoreRing score={m?.businessScore ?? 0} showBadge={false} />
               <div className="w-full mt-6 space-y-3">
                 {(m?.businessScoreBreakdown ?? []).map(item => (
                   <div key={item.label}>
@@ -197,33 +209,41 @@ export default function DashboardPage() {
         {/* KPI row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[12px] p-4 transition-all hover:border-[var(--border-2)]">
-            <div className="flex items-center justify-between mb-[6px]">
-              <span className="text-[10.5px] text-[var(--text-3)] font-medium">Ingresos del mes</span>
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-7 h-7 rounded-full bg-[rgba(16,185,129,0.12)] text-[var(--green)] flex items-center justify-center"><i className="ti ti-currency-dollar text-[14px]" aria-hidden="true" /></div>
               <DeltaBadge value={m?.revenueDelta ?? null} />
             </div>
-            <div className="text-[22px] font-bold text-[var(--text)] font-mono tracking-tight">{formatCurrency(m?.monthlyRevenue ?? 0)}</div>
+            <div className="text-[10.5px] text-[var(--text-3)] font-medium mb-[2px]">Ingresos del mes</div>
+            <div className="text-[24px] font-bold text-[var(--text)] font-mono tracking-tight">{formatCurrency(m?.monthlyRevenue ?? 0)}</div>
             <div className="text-[11px] text-[var(--text-3)] mt-1">de {formatCurrency(m?.monthlyGoal ?? 0)} objetivo</div>
           </div>
           <div className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[12px] p-4 transition-all hover:border-[var(--border-2)]">
-            <div className="flex items-center justify-between mb-[6px]">
-              <span className="text-[10.5px] text-[var(--text-3)] font-medium">Leads nuevos</span>
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-7 h-7 rounded-full bg-[rgba(249,115,22,0.12)] text-[#FDBA74] flex items-center justify-center"><i className="ti ti-users text-[14px]" aria-hidden="true" /></div>
               {m?.newLeadsDelta != null && (
                 <span className={`text-[10.5px] font-semibold px-1.5 py-[1px] rounded-full ${m.newLeadsDelta >= 0 ? 'text-[var(--green)] bg-[rgba(16,185,129,0.12)]' : 'text-[#FCA5A5] bg-[rgba(239,68,68,0.12)]'}`}>
                   {m.newLeadsDelta >= 0 ? '+' : ''}{m.newLeadsDelta}
                 </span>
               )}
             </div>
-            <div className="text-[22px] font-bold text-[var(--text)] font-mono tracking-tight">{m?.newLeadsThisMonth ?? 0}</div>
+            <div className="text-[10.5px] text-[var(--text-3)] font-medium mb-[2px]">Leads nuevos</div>
+            <div className="text-[24px] font-bold text-[var(--text)] font-mono tracking-tight">{m?.newLeadsThisMonth ?? 0}</div>
             <div className="text-[11px] text-[var(--text-3)] mt-1">este mes</div>
           </div>
           <div className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[12px] p-4 transition-all hover:border-[var(--border-2)]">
-            <div className="text-[10.5px] text-[var(--text-3)] font-medium mb-[6px]">Tasa de cierre</div>
-            <div className="text-[22px] font-bold text-[var(--text)] font-mono tracking-tight">{(m?.closeRate ?? 0).toFixed(0)}%</div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-7 h-7 rounded-full bg-[rgba(59,130,246,0.12)] text-[#93C5FD] flex items-center justify-center"><i className="ti ti-percentage text-[14px]" aria-hidden="true" /></div>
+            </div>
+            <div className="text-[10.5px] text-[var(--text-3)] font-medium mb-[2px]">Tasa de cierre</div>
+            <div className="text-[24px] font-bold text-[var(--text)] font-mono tracking-tight">{(m?.closeRate ?? 0).toFixed(0)}%</div>
             <div className="text-[11px] text-[var(--text-3)] mt-1">de todos tus leads</div>
           </div>
           <div className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[12px] p-4 transition-all hover:border-[var(--border-2)]">
-            <div className="text-[10.5px] text-[var(--text-3)] font-medium mb-[6px]">Ticket promedio</div>
-            <div className="text-[22px] font-bold text-[var(--text)] font-mono tracking-tight">{formatCurrency(m?.avgTicket ?? 0)}</div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-7 h-7 rounded-full bg-[rgba(245,158,11,0.12)] text-[var(--amber)] flex items-center justify-center"><i className="ti ti-receipt text-[14px]" aria-hidden="true" /></div>
+            </div>
+            <div className="text-[10.5px] text-[var(--text-3)] font-medium mb-[2px]">Ticket promedio</div>
+            <div className="text-[24px] font-bold text-[var(--text)] font-mono tracking-tight">{formatCurrency(m?.avgTicket ?? 0)}</div>
             <div className="text-[11px] text-[var(--text-3)] mt-1">por negocio ganado</div>
           </div>
         </div>

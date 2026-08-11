@@ -4,16 +4,17 @@ interface ScoreRingProps {
   score: number
   size?: number
   strokeWidth?: number
+  showBadge?: boolean
 }
 
-function statusFor(score: number) {
+export function statusFor(score: number) {
   if (score >= 90) return { label: 'Excelente', color: 'var(--green)', bg: 'rgba(16,185,129,0.15)' }
   if (score >= 75) return { label: 'Muy bueno', color: '#FDBA74', bg: 'rgba(249,115,22,0.15)' }
   if (score >= 50) return { label: 'Bueno', color: 'var(--amber)', bg: 'rgba(245,158,11,0.15)' }
   return { label: 'Necesita atención', color: '#FCA5A5', bg: 'rgba(239,68,68,0.15)' }
 }
 
-export function ScoreRing({ score, size = 132, strokeWidth = 11 }: ScoreRingProps) {
+export function ScoreRing({ score, size = 140, strokeWidth = 11, showBadge = true }: ScoreRingProps) {
   const clamped = Math.min(Math.max(score, 0), 100)
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
@@ -49,16 +50,18 @@ export function ScoreRing({ score, size = 132, strokeWidth = 11 }: ScoreRingProp
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-[30px] font-bold text-white tracking-tight leading-none">
-          {Math.round(clamped)}<span className="text-[15px] text-white/50 font-medium">/100</span>
+        <span className="text-[34px] font-bold text-white tracking-tight leading-none">
+          {Math.round(clamped)}<span className="text-[16px] text-white/50 font-medium">/100</span>
         </span>
       </div>
-      <div
-        className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[9.5px] font-semibold px-2 py-[3px] rounded-full whitespace-nowrap"
-        style={{ background: status.bg, color: status.color }}
-      >
-        {status.label}
-      </div>
+      {showBadge && (
+        <div
+          className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[9.5px] font-semibold px-2 py-[3px] rounded-full whitespace-nowrap"
+          style={{ background: status.bg, color: status.color }}
+        >
+          {status.label}
+        </div>
+      )}
     </div>
   )
 }
