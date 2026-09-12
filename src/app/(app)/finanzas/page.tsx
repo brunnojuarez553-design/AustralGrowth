@@ -1,165 +1,55 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Topbar } from '@/components/layout/Topbar'
 import { FinanceFormModal } from '@/components/finanzas/FinanceFormModal'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
-interface FinanceEntry {
-  id: string
-  type: 'INCOME' | 'EXPENSE' | 'ADVANCE' | 'PENDING'
-  category: string
-  description: string
-  amount: number
-  currency: string
-  date: string
-  isPaid: boolean
+interface FinanceEntry { id:string; type:'INCOME'|'EXPENSE'|'ADVANCE'|'PENDING'; category:string; description:string; amount:number; currency:string; date:string; isPaid:boolean }
+const labels = { INCOME:'Ingreso', EXPENSE:'Gasto', ADVANCE:'Anticipo', PENDING:'Pendiente' }
+const tones = { INCOME:'text-emerald-300 bg-emerald-400/10 border-emerald-400/15', EXPENSE:'text-red-300 bg-red-400/10 border-red-400/15', ADVANCE:'text-sky-300 bg-sky-400/10 border-sky-400/15', PENDING:'text-amber-300 bg-amber-400/10 border-amber-400/15' }
+
+function MoneyCard({label,value,icon,glow,detail}:{label:string;value:number;icon:string;glow:string;detail:string}) {
+  return <article className="austral-panel group relative overflow-hidden rounded-2xl p-5 transition duration-300 hover:-translate-y-0.5 hover:border-white/[.15]">
+    <div className={`absolute -right-8 -top-8 h-24 w-24 rounded-full blur-3xl ${glow}`}/>
+    <div className="relative flex items-start justify-between"><div><p className="text-[10px] font-semibold uppercase tracking-[.14em] text-[var(--text-3)]">{label}</p><p className="mt-3 font-mono text-[25px] font-bold tracking-[-.04em] text-white">{formatCurrency(value)}</p><p className="mt-1 text-[10.5px] text-[var(--text-3)]">{detail}</p></div><div className="grid h-10 w-10 place-items-center rounded-xl border border-white/[.08] bg-white/[.04] text-[#ff9b55]"><i className={`ti ${icon} text-[18px]`}/></div></div>
+  </article>
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (!active || !payload?.length) return null
-  return (
-    <div className="bg-[#1C1C2A] border border-[#252535] rounded-lg px-3 py-2 text-[12px]">
-      <p className="text-[var(--text-3)] mb-1">{label}</p>
-      {payload.map((p: any) => (
-        <p key={p.name} style={{ color: p.color }}>{p.name}: {formatCurrency(p.value)}</p>
-      ))}
-    </div>
-  )
-}
+const ChartTip = ({active,payload,label}:any) => active && payload?.length ? <div className="rounded-xl border border-white/10 bg-[#111]/95 px-3 py-2 shadow-2xl"><p className="mb-1 text-[10px] uppercase tracking-wider text-zinc-500">{label}</p>{payload.map((p:any)=><p key={p.name} className="text-xs" style={{color:p.color}}>{p.name}: {formatCurrency(p.value)}</p>)}</div> : null
 
 export default function FinanzasPage() {
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editingEntry, setEditingEntry] = useState<FinanceEntry | null>(null)
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['finances'],
-    queryFn: async () => {
-      const res = await fetch('/api/finances')
-      const json = await res.json()
-      return json.data as { finances: FinanceEntry[]; summary: Record<string, number> }
-    },
-    staleTime: 30_000,
-  })
-
-  const summary = data?.summary ?? { totalIncome: 0, totalExpenses: 0, netProfit: 0, pending: 0, margin: 0 }
-  const finances = data?.finances ?? []
-
-  const chartData = (() => {
-    const now = new Date()
-    const months: { month: string; revenue: number; expenses: number }[] = []
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      const label = d.toLocaleDateString('es', { month: 'short' })
-      const inMonth = finances.filter(f => {
-        const fd = new Date(f.date)
-        return fd.getFullYear() === d.getFullYear() && fd.getMonth() === d.getMonth()
-      })
-      months.push({
-        month: label,
-        revenue: inMonth.filter(f => f.type === 'INCOME').reduce((s, f) => s + f.amount, 0),
-        expenses: inMonth.filter(f => f.type === 'EXPENSE').reduce((s, f) => s + f.amount, 0),
-      })
-    }
-    return months
-  })()
-
-  function openCreate() { setEditingEntry(null); setModalOpen(true) }
-  function openEdit(entry: FinanceEntry) { setEditingEntry(entry); setModalOpen(true) }
-
-  return (
-    <>
-      <Topbar title="Finanzas" subtitle="Control financiero completo" primaryAction={{ label: 'Registrar movimiento', onClick: openCreate }} />
-      <div className="flex-1 overflow-y-auto p-5 space-y-4">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            { label: 'Facturación mes', value: formatCurrency(summary.totalIncome), color: 'var(--text)', icon: 'ti-coin' },
-            { label: 'Cobrado', value: formatCurrency(summary.totalIncome - (summary.pending ?? 0)), color: 'var(--text)', icon: 'ti-check' },
-            { label: 'Pendiente', value: formatCurrency(summary.pending ?? 0), color: 'var(--amber)', icon: 'ti-clock' },
-            { label: 'Gastos del mes', value: formatCurrency(summary.totalExpenses), color: 'var(--red)', icon: 'ti-minus' },
-          ].map((k, i) => (
-            <div key={i} className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[10px] p-4">
-              <div className="flex items-center gap-[5px] text-[11px] text-[var(--text-3)] mb-[6px]">
-                <i className={`ti ${k.icon}`} aria-hidden="true" /> {k.label}
-              </div>
-              <div className="text-[22px] font-bold font-mono tracking-tight" style={{ color: k.color }}>{k.value}</div>
-            </div>
-          ))}
+  const [modalOpen,setModalOpen]=useState(false)
+  const [editingEntry,setEditingEntry]=useState<FinanceEntry|null>(null)
+  const [filter,setFilter]=useState<'ALL'|FinanceEntry['type']>('ALL')
+  const {data,isLoading,isError}=useQuery({queryKey:['finances'],queryFn:async()=>{const r=await fetch('/api/finances');if(!r.ok)throw new Error();return (await r.json()).data as {finances:FinanceEntry[];summary:Record<string,number>}},staleTime:30000})
+  const finances=data?.finances??[]
+  const s=data?.summary??{totalIncome:0,totalExpenses:0,netProfit:0,pending:0,margin:0}
+  const collected=Math.max(s.totalIncome-(s.pending??0),0)
+  const progress=s.totalIncome>0?Math.min(100,collected/s.totalIncome*100):0
+  const shown=filter==='ALL'?finances:finances.filter(f=>f.type===filter)
+  const chartData=useMemo(()=>Array.from({length:6},(_,i)=>{const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-(5-i));const e=finances.filter(f=>{const x=new Date(f.date);return x.getMonth()===d.getMonth()&&x.getFullYear()===d.getFullYear()});return{month:d.toLocaleDateString('es',{month:'short'}).replace('.',''),Ingresos:e.filter(f=>f.type==='INCOME'||f.type==='ADVANCE').reduce((a,b)=>a+b.amount,0),Gastos:e.filter(f=>f.type==='EXPENSE').reduce((a,b)=>a+b.amount,0)}},),[finances])
+  const create=()=>{setEditingEntry(null);setModalOpen(true)}
+  return <>
+    <Topbar title="Centro financiero" subtitle="Ingresos, rentabilidad y flujo de caja" primaryAction={{label:'Registrar ingreso',onClick:create}}/>
+    <main className="flex-1 overflow-y-auto"><div className="austral-enter mx-auto w-full max-w-[1480px] space-y-5 p-4 pb-12 md:p-7">
+      <section className="relative overflow-hidden rounded-[26px] border border-orange-400/15 bg-gradient-to-br from-orange-500/[.13] via-[#111112] to-black p-6 md:p-8">
+        <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-orange-500/10 blur-[90px]"/>
+        <div className="relative flex flex-col justify-between gap-8 lg:flex-row lg:items-end"><div><div className="mb-4 inline-flex items-center gap-2 rounded-full border border-orange-400/15 bg-orange-400/[.07] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.16em] text-[#ffad73]"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-orange-400"/>Austral Web Studio</div><p className="text-[11px] font-medium uppercase tracking-[.16em] text-zinc-500">Resultado neto acumulado</p><h1 className="mt-2 font-mono text-4xl font-bold tracking-[-.055em] text-white md:text-6xl">{formatCurrency(s.netProfit??0)}</h1><p className="mt-3 max-w-xl text-[12px] text-zinc-400">Una vista clara de lo que entra, lo que sale y lo que todavía falta cobrar.</p></div>
+          <div className="grid min-w-full grid-cols-2 gap-3 sm:min-w-[390px]"><div className="rounded-2xl border border-white/[.07] bg-black/25 p-4"><p className="text-[10px] text-zinc-500">Margen neto</p><p className="mt-1 font-mono text-2xl font-bold text-emerald-300">{Math.round(s.margin??0)}%</p></div><div className="rounded-2xl border border-white/[.07] bg-black/25 p-4"><p className="text-[10px] text-zinc-500">Proyección anual</p><p className="mt-1 font-mono text-lg font-bold text-white">{formatCurrency(s.totalIncome*12)}</p></div></div>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] p-4">
-            <div className="text-[13px] font-semibold text-[var(--text)] mb-4">Movimientos · {new Date().toLocaleDateString('es', { month: 'long', year: 'numeric' })}</div>
-            <div className="space-y-0 max-h-[340px] overflow-y-auto">
-              {isLoading && <div className="text-[12px] text-[var(--text-3)] py-4 text-center">Cargando...</div>}
-              {!isLoading && finances.length === 0 && (
-                <div className="text-[12px] text-[var(--text-3)] py-4 text-center">
-                  Todavía no cargaste ningún movimiento. Usá el botón "Registrar movimiento".
-                </div>
-              )}
-              {finances.map(mov => (
-                <div key={mov.id} onClick={() => openEdit(mov)} className="flex items-center justify-between py-[10px] border-b border-[var(--border)] last:border-0 cursor-pointer hover:bg-[var(--surface-3)] px-1 rounded transition-all">
-                  <div>
-                    <div className="text-[12.5px] text-[var(--text)]">{mov.description}</div>
-                    <div className="text-[10.5px] text-[var(--text-3)]">{formatDate(mov.date)} · {mov.category}</div>
-                  </div>
-                  <span className={`font-mono text-[13px] font-semibold ${mov.type === 'INCOME' || mov.type === 'ADVANCE' ? 'text-[var(--green)]' : mov.type === 'PENDING' ? 'text-[var(--amber)]' : 'text-[var(--red)]'}`}>
-                    {mov.type === 'EXPENSE' ? '-' : '+'}{formatCurrency(mov.amount)}
-                  </span>
-                </div>
-              ))}
-              {finances.length > 0 && (
-                <div className="flex items-center justify-between py-3">
-                  <span className="text-[12.5px] font-semibold text-[var(--text)]">Beneficio neto</span>
-                  <span className="font-mono text-[15px] font-bold text-[var(--green)]">{formatCurrency(summary.netProfit ?? 0)}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] p-4">
-            <div className="text-[13px] font-semibold text-[var(--text)] mb-4">Flujo de caja · últimos 6 meses</div>
-            <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#EF4444" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="month" tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}`} />
-                <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="revenue" name="Ingresos" stroke="#10B981" strokeWidth={2} fill="url(#colorRevenue)" />
-                <Area type="monotone" dataKey="expenses" name="Gastos" stroke="#EF4444" strokeWidth={2} fill="url(#colorExpenses)" />
-              </AreaChart>
-            </ResponsiveContainer>
-
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-[var(--border)] pt-4">
-              <div className="text-center">
-                <div className="text-[10px] text-[var(--text-3)]">Margen neto</div>
-                <div className="text-[15px] font-bold text-[var(--green)] font-mono">{Math.round(summary.margin ?? 0)}%</div>
-              </div>
-              <div className="text-center">
-                <div className="text-[10px] text-[var(--text-3)]">Facturación mes</div>
-                <div className="text-[15px] font-bold text-[var(--text)] font-mono">{formatCurrency(summary.totalIncome)}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-[10px] text-[var(--text-3)]">Proyección anual</div>
-                <div className="text-[15px] font-bold text-[var(--text)] font-mono">{formatCurrency(summary.totalIncome * 12)}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <FinanceFormModal open={modalOpen} onClose={() => setModalOpen(false)} entry={editingEntry} />
-    </>
-  )
+      </section>
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4"><MoneyCard label="Ingresos" value={s.totalIncome} icon="ti-arrow-up-right" glow="bg-orange-500/20" detail="Facturación registrada"/><MoneyCard label="Cobrado" value={collected} icon="ti-circle-check" glow="bg-emerald-500/20" detail={`${Math.round(progress)}% de lo facturado`}/><MoneyCard label="Por cobrar" value={s.pending??0} icon="ti-hourglass" glow="bg-amber-500/20" detail="Capital pendiente"/><MoneyCard label="Gastos" value={s.totalExpenses} icon="ti-arrow-down-right" glow="bg-red-500/20" detail="Egresos registrados"/></section>
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1.25fr_.75fr]">
+        <div className="austral-panel rounded-[20px] p-5 md:p-6"><div className="mb-6 flex justify-between"><div><h2 className="text-sm font-semibold text-white">Evolución del negocio</h2><p className="mt-1 text-[10.5px] text-zinc-500">Ingresos y gastos · últimos 6 meses</p></div><span className="h-fit rounded-lg border border-white/[.07] bg-white/[.03] px-2.5 py-1.5 text-[10px] text-zinc-400">USD</span></div><div className="h-[270px]"><ResponsiveContainer width="100%" height="100%"><AreaChart data={chartData} margin={{top:10,right:4,left:-18,bottom:0}}><defs><linearGradient id="incomeFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ff6a00" stopOpacity=".34"/><stop offset="1" stopColor="#ff6a00" stopOpacity="0"/></linearGradient></defs><CartesianGrid vertical={false} stroke="rgba(255,255,255,.055)" strokeDasharray="4 6"/><XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill:'#71717a',fontSize:10}}/><YAxis axisLine={false} tickLine={false} tick={{fill:'#52525b',fontSize:9}} tickFormatter={v=>`$${v}`}/><Tooltip content={<ChartTip/>}/><Area type="monotone" dataKey="Ingresos" stroke="#ff7a1a" strokeWidth={2.5} fill="url(#incomeFill)"/><Area type="monotone" dataKey="Gastos" stroke="#ef4444" strokeWidth={1.5} fill="transparent"/></AreaChart></ResponsiveContainer></div></div>
+        <div className="austral-panel rounded-[20px] p-5 md:p-6"><div className="flex items-center justify-between"><div><h2 className="text-sm font-semibold text-white">Estado de cobros</h2><p className="mt-1 text-[10.5px] text-zinc-500">Seguimiento del capital</p></div><span className="font-mono text-xl font-bold text-[#ff9b55]">{Math.round(progress)}%</span></div><div className="mt-6 h-2 overflow-hidden rounded-full bg-white/[.06]"><div className="h-full rounded-full bg-gradient-to-r from-orange-600 to-orange-400" style={{width:`${progress}%`}}/></div><div className="mt-8 space-y-4">{[['Total facturado',s.totalIncome,'bg-orange-400'],['Capital cobrado',collected,'bg-emerald-400'],['Capital pendiente',s.pending??0,'bg-amber-400']].map(([n,v,d])=><div key={String(n)} className="flex items-center justify-between border-b border-white/[.055] pb-4 last:border-0"><span className="flex items-center gap-2 text-[11px] text-zinc-400"><i className={`h-1.5 w-1.5 rounded-full ${d}`}/>{n}</span><strong className="font-mono text-[13px] text-white">{formatCurrency(Number(v))}</strong></div>)}</div><button onClick={create} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-[11px] font-semibold text-black hover:bg-orange-100"><i className="ti ti-plus"/>Cargar nuevo ingreso</button></div>
+      </section>
+      <section className="austral-panel overflow-hidden rounded-[20px]"><div className="flex flex-col gap-4 border-b border-white/[.06] p-5 md:flex-row md:items-center md:justify-between"><div><h2 className="text-sm font-semibold text-white">Movimientos recientes</h2><p className="mt-1 text-[10.5px] text-zinc-500">Presioná cualquier movimiento para editarlo</p></div><div className="flex max-w-full gap-1 overflow-x-auto rounded-xl border border-white/[.07] bg-black/25 p-1">{(['ALL','INCOME','ADVANCE','PENDING','EXPENSE'] as const).map(x=><button key={x} onClick={()=>setFilter(x)} className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-[10px] ${filter===x?'bg-white font-semibold text-black':'text-zinc-500 hover:text-white'}`}>{x==='ALL'?'Todos':labels[x]}</button>)}</div></div>
+        {isLoading&&<div className="p-12 text-center text-xs text-zinc-500">Cargando movimientos…</div>}{isError&&<div className="p-12 text-center text-xs text-red-300">No se pudieron cargar los movimientos.</div>}{!isLoading&&!isError&&shown.length===0&&<div className="flex flex-col items-center p-12 text-center"><div className="grid h-12 w-12 place-items-center rounded-2xl border border-white/[.07] bg-white/[.03] text-orange-300"><i className="ti ti-receipt text-xl"/></div><p className="mt-4 text-xs font-medium text-white">Todavía no hay movimientos</p><p className="mt-1 text-[10.5px] text-zinc-500">Registrá tu primer ingreso para comenzar.</p></div>}
+        <div className="divide-y divide-white/[.055]">{shown.map(item=><button key={item.id} onClick={()=>{setEditingEntry(item);setModalOpen(true)}} className="grid w-full grid-cols-[1fr_auto] items-center gap-4 px-5 py-4 text-left hover:bg-white/[.025] md:grid-cols-[1fr_160px_130px]"><div className="flex min-w-0 items-center gap-3"><div className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl border ${tones[item.type]}`}><i className={`ti ${item.type==='EXPENSE'?'ti-arrow-down':'ti-arrow-up'} text-sm`}/></div><div className="min-w-0"><p className="truncate text-[12px] font-medium text-white">{item.description}</p><p className="mt-0.5 truncate text-[10px] text-zinc-500">{item.category} · {formatDate(item.date)}</p></div></div><span className={`hidden w-fit rounded-full border px-2.5 py-1 text-[9px] md:block ${tones[item.type]}`}>{labels[item.type]}</span><span className={`text-right font-mono text-[13px] font-semibold ${item.type==='EXPENSE'?'text-red-300':item.type==='PENDING'?'text-amber-300':'text-emerald-300'}`}>{item.type==='EXPENSE'?'−':'+'}{formatCurrency(item.amount)}</span></button>)}</div>
+      </section>
+    </div></main><FinanceFormModal open={modalOpen} onClose={()=>setModalOpen(false)} entry={editingEntry}/>
+  </>
 }
