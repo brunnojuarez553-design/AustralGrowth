@@ -1,342 +1,76 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
 import { useDashboard } from '@/hooks/useDashboard'
 import { Topbar } from '@/components/layout/Topbar'
 import { LeadFormModal } from '@/components/crm/LeadFormModal'
-import { ScoreRing, statusFor } from '@/components/dashboard/ScoreRing'
 import { BoldText } from '@/components/ui/BoldText'
 import { formatCurrency, formatRelativeTime } from '@/lib/utils'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (!active || !payload?.length) return null
-  return (
-    <div className="bg-[#1C1C2A] border border-[#252535] rounded-lg px-3 py-2 text-[12px]">
-      <p className="text-[var(--text-3)] mb-1">{label}</p>
-      {payload.map((p: any) => (
-        <p key={p.name} style={{ color: p.color }}>{p.name}: {formatCurrency(p.value)}</p>
-      ))}
-    </div>
-  )
+const stageColors=['#ff7a1a','#a78bfa','#60a5fa','#38bdf8','#34d399','#fbbf24','#fb7185']
+const alertIcons={hot:'ti-flame',stale:'ti-clock',insight:'ti-sparkles',empty:'ti-info-circle'}
+const greet=(h:number)=>h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches'
+
+function Trend({value}:{value:number|null|undefined}){
+  if(value==null)return null
+  return <span className={`rounded-full px-2 py-1 text-[10px] font-semibold ${value>=0?'bg-emerald-400/10 text-emerald-300':'bg-rose-400/10 text-rose-300'}`}>{value>=0?'↑':'↓'} {Math.abs(value).toFixed(1)}%</span>
 }
 
-const STAGE_COLORS = ['#F97316','#7C3AED','#3B82F6','#06B6D4','#10B981','#F59E0B','#EF4444','#059669','#475569']
-
-const ALERT_META = {
-  hot:     { icon: 'ti-flame', color: 'rgba(249,115,22,0.15)', iconColor: '#FDBA74' },
-  stale:   { icon: 'ti-clock', color: 'rgba(245,158,11,0.15)', iconColor: 'var(--amber)' },
-  insight: { icon: 'ti-trending-up', color: 'rgba(16,185,129,0.15)', iconColor: 'var(--green)' },
-  empty:   { icon: 'ti-info-circle', color: 'rgba(148,163,184,0.15)', iconColor: 'var(--text-3)' },
+function Kpi({title,value,detail,icon,trend}:{title:string;value:string;detail:string;icon:string;trend?:number|null}){
+  return <article className="apple-card group relative min-h-[170px] overflow-hidden p-6">
+    <div className="flex items-start justify-between"><div className="grid h-10 w-10 place-items-center rounded-[13px] bg-white/[.065] text-zinc-200 shadow-[inset_0_1px_rgba(255,255,255,.05)]"><i className={`ti ${icon} text-[18px]`}/></div><Trend value={trend}/></div>
+    <p className="mt-7 text-[11px] font-medium text-zinc-500">{title}</p><p className="mt-1 font-mono text-[28px] font-semibold tracking-[-.05em] text-white">{value}</p><p className="mt-1 text-[10.5px] text-zinc-600">{detail}</p>
+  </article>
 }
 
-function greetingWord(hour: number) {
-  if (hour < 12) return 'Buenos días'
-  if (hour < 19) return 'Buenas tardes'
-  return 'Buenas noches'
-}
+const Tip=({active,payload,label}:any)=>active&&payload?.length?<div className="rounded-xl border border-white/10 bg-[#1c1c1e]/95 px-3 py-2 shadow-2xl backdrop-blur-xl"><p className="text-[10px] text-zinc-500">{label}</p><p className="mt-1 text-xs text-white">Ingresos · {formatCurrency(payload[0].value)}</p></div>:null
 
-function DeltaBadge({ value, invertColor = false }: { value: number | null; suffix?: string; invertColor?: boolean }) {
-  if (value === null) return null
-  const positive = invertColor ? value <= 0 : value >= 0
-  return (
-    <span className={`text-[10.5px] font-semibold px-1.5 py-[1px] rounded-full ${positive ? 'text-[var(--green)] bg-[rgba(16,185,129,0.12)]' : 'text-[#FCA5A5] bg-[rgba(239,68,68,0.12)]'}`}>
-      {value >= 0 ? '+' : ''}{value.toFixed(1)}%
-    </span>
-  )
-}
+export default function DashboardPage(){
+  const {data:m,isLoading,isError,error}=useDashboard()
+  const [modalOpen,setModalOpen]=useState(false)
+  const [now,setNow]=useState<Date|null>(null)
+  useEffect(()=>{setNow(new Date());const t=setInterval(()=>setNow(new Date()),60000);return()=>clearInterval(t)},[])
+  const progress=Math.min(m?.monthlyGoalProgress??0,100)
+  const remaining=Math.max((m?.monthlyGoal??0)-(m?.monthlyRevenue??0),0)
+  const insight=(m?.alerts??[])[0]?.text??'Cargá tus primeros leads para activar las recomendaciones comerciales.'
 
-export default function DashboardPage() {
-  const { data: metrics, isLoading, isError, error } = useDashboard()
-  const [modalOpen, setModalOpen] = useState(false)
-  const [now, setNow] = useState<Date | null>(null)
+  function exportReport(){if(!m)return;const rows=[['Métrica','Valor'],['Facturación',formatCurrency(m.monthlyRevenue)],['Objetivo',formatCurrency(m.monthlyGoal)],['Leads activos',String(m.activeLeads)],['Tasa de cierre',`${m.closeRate.toFixed(1)}%`],['Ticket promedio',formatCurrency(m.avgTicket)]];const blob=new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`austral-growth-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(url)}
 
-  useEffect(() => {
-    setNow(new Date())
-    const t = setInterval(() => setNow(new Date()), 60_000)
-    return () => clearInterval(t)
-  }, [])
+  if(isLoading)return <div className="flex flex-1 items-center justify-center"><div className="flex items-center gap-3 text-xs text-zinc-500"><span className="h-2 w-2 animate-pulse rounded-full bg-orange-400"/>Preparando tu espacio…</div></div>
 
-  function exportReport() {
-    if (!m) return
-    const rows = [
-      ['Métrica', 'Valor'],
-      ['Facturación del mes', formatCurrency(m.monthlyRevenue)],
-      ['Objetivo mensual', formatCurrency(m.monthlyGoal)],
-      ['Puntaje comercial', `${m.businessScore}/100`],
-      ['Leads activos', String(m.activeLeads)],
-      ['Leads calientes', String(m.hotLeads)],
-      ['Tasa de cierre', `${m.closeRate.toFixed(1)}%`],
-      ['Ticket promedio', formatCurrency(m.avgTicket)],
-      ['Valor de pipeline ponderado', formatCurrency(m.weightedPipelineValue)],
-    ]
-    const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n')
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `reporte-austral-growth-${new Date().toISOString().slice(0, 10)}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
+  return <>
+    <Topbar title="Overview" subtitle="Austral Growth OS" primaryAction={{label:'Nuevo lead',onClick:()=>setModalOpen(true)}}/>
+    <div className="dashboard-scroll flex-1 overflow-y-auto"><div className="mx-auto max-w-[1500px] px-4 pb-16 pt-8 md:px-9 md:pt-11">
+      {isError&&<div className="mb-6 rounded-2xl border border-rose-400/15 bg-rose-400/[.06] p-4 text-xs text-rose-300">No se pudo cargar el dashboard: {(error as Error)?.message}</div>}
 
-  if (isLoading) return (
-    <div className="flex-1 flex items-center justify-center">
-      <div className="text-[var(--text-3)] text-[13px]">Cargando métricas...</div>
-    </div>
-  )
+      <header className="apple-reveal mb-9 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+        <div><div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.16em] text-emerald-400"><span className="relative flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-50"/><span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400"/></span>Sistema actualizado</div><h1 className="text-[36px] font-semibold leading-none tracking-[-.055em] text-[#f5f5f7] md:text-[52px]" suppressHydrationWarning>{now?greet(now.getHours()):'Hola'}, Bruno.</h1><p className="mt-3 text-[13px] text-zinc-500">Todo lo importante de Austral, en una sola vista.</p></div>
+        <button onClick={exportReport} className="flex w-fit items-center gap-2 rounded-full border border-white/[.085] bg-white/[.045] px-4 py-2.5 text-[11px] font-medium text-zinc-300 transition hover:bg-white/[.08]"><i className="ti ti-download"/>Exportar reporte</button>
+      </header>
 
-  const m = metrics
-  const remaining = Math.max((m?.monthlyGoal ?? 0) - (m?.monthlyRevenue ?? 0), 0)
-  const goalMet = (m?.monthlyGoalProgress ?? 0) >= 100
-  const topAlertText = (m?.alerts ?? [])[0]?.text ?? 'Cargá tus primeros leads para empezar a ver insights acá.'
-
-  return (
-    <>
-      <Topbar title="Dashboard Ejecutivo" subtitle="Vista general" primaryAction={{ label: 'Nuevo lead', onClick: () => setModalOpen(true) }} />
-      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 max-w-[1400px] mx-auto w-full">
-
-        {isError && (
-          <div className="text-[12.5px] rounded-[8px] px-4 py-3" style={{ background: 'rgba(239,68,68,0.1)', color: '#FCA5A5', border: '1px solid rgba(239,68,68,0.2)' }}>
-            No se pudo cargar el dashboard: {(error as Error)?.message}
+      <section className="apple-reveal apple-delay-1 grid grid-cols-1 gap-4 xl:grid-cols-[1.5fr_.72fr]">
+        <article className="apple-hero relative min-h-[430px] overflow-hidden p-7 md:p-10">
+          <div className="apple-orb"/><div className="relative z-10 flex h-full flex-col justify-between">
+            <div><div className="mb-7 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.17em] text-zinc-400"><span className="grid h-6 w-6 place-items-center rounded-lg bg-white text-black"><i className="ti ti-sparkles"/></span>Austral Intelligence</div><h2 className="max-w-[760px] text-[38px] font-semibold leading-[1.03] tracking-[-.06em] text-white md:text-[64px]">Este mes generaste <span className="apple-gradient-text">{formatCurrency(m?.monthlyRevenue??0)}</span>.</h2><div className="mt-6 max-w-[650px] text-[13px] leading-6 text-zinc-400"><BoldText text={insight}/></div></div>
+            <div className="mt-12"><div className="mb-3 flex items-end justify-between"><div><p className="text-[10px] text-zinc-500">Progreso del objetivo</p><p className="mt-1 text-sm font-medium text-white">{Math.round(progress)}% completado</p></div><p className="text-[11px] text-zinc-500">Faltan {formatCurrency(remaining)}</p></div><div className="h-1.5 overflow-hidden rounded-full bg-white/[.075]"><div className="h-full rounded-full bg-gradient-to-r from-[#ff6a00] to-[#ffad66] shadow-[0_0_18px_rgba(255,122,26,.45)]" style={{width:`${progress}%`}}/></div><div className="mt-7 flex flex-wrap gap-3"><a href="/crm" className="rounded-full bg-white px-5 py-2.5 text-[11px] font-semibold text-black transition hover:scale-[1.02]">Abrir pipeline</a><a href="/metricas" className="rounded-full bg-white/[.065] px-5 py-2.5 text-[11px] font-medium text-white transition hover:bg-white/[.1]">Ver análisis <i className="ti ti-arrow-up-right ml-1"/></a></div></div>
           </div>
-        )}
+        </article>
 
-        {/* Greeting header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="relative flex h-[7px] w-[7px]">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--green)] opacity-75" />
-                <span className="relative inline-flex rounded-full h-[7px] w-[7px] bg-[var(--green)]" />
-              </span>
-              <span className="text-[10.5px] font-semibold text-[var(--green)] tracking-[0.08em] uppercase">Pipeline activo</span>
-              {now && (
-                <span className="text-[11px] text-[var(--text-3)]" suppressHydrationWarning>
-                  · {now.toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' })} · {now.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              )}
-            </div>
-            <h1 className="text-[28px] md:text-[34px] font-bold text-[var(--text)] tracking-tight" suppressHydrationWarning>
-              {now ? greetingWord(now.getHours()) : 'Hola'}, Bruno.
-            </h1>
-            <p className="text-[13px] text-[var(--text-3)] mt-1">Austral está siguiendo tu pipeline y facturación en tiempo real.</p>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button onClick={exportReport} className="flex items-center gap-[6px] px-3.5 py-2 rounded-[8px] text-[12.5px] font-medium text-[var(--text-2)] border border-[var(--border-2)] hover:bg-[var(--surface-3)] hover:text-[var(--text)] transition-all">
-              <i className="ti ti-download text-[14px]" aria-hidden="true" /> Exportar reporte
-            </button>
-          </div>
-        </div>
+        <article className="apple-card flex min-h-[430px] flex-col p-7"><div className="flex items-start justify-between"><div><p className="text-[10px] font-semibold uppercase tracking-[.15em] text-zinc-600">Salud comercial</p><h3 className="mt-2 text-base font-semibold text-white">Performance</h3></div><span className="rounded-full bg-white/[.06] px-2.5 py-1 text-[9px] text-zinc-400">En vivo</span></div><div className="my-auto flex flex-col items-center"><div className="relative grid h-44 w-44 place-items-center rounded-full" style={{background:`conic-gradient(#ff7a1a ${m?.businessScore??0}%,rgba(255,255,255,.065) 0)`}}><div className="absolute inset-[9px] rounded-full bg-[#19191b] shadow-[inset_0_0_35px_rgba(0,0,0,.4)]"/><div className="relative text-center"><strong className="font-mono text-5xl font-semibold tracking-[-.07em] text-white">{Math.round(m?.businessScore??0)}</strong><p className="mt-1 text-[9px] uppercase tracking-widest text-zinc-600">sobre 100</p></div></div></div><div className="space-y-3">{(m?.businessScoreBreakdown??[]).map(x=><div key={x.label}><div className="mb-1.5 flex justify-between text-[10px]"><span className="text-zinc-500">{x.label}</span><span className="font-mono text-zinc-300">{x.value}%</span></div><div className="h-1 overflow-hidden rounded-full bg-white/[.06]"><div className="h-full rounded-full bg-zinc-300" style={{width:`${x.value}%`}}/></div></div>)}</div></article>
+      </section>
 
-        {/* Hero: Austral Intelligence */}
-        <div className="rounded-[20px] p-6 md:p-8 border border-[rgba(249,115,22,0.18)] overflow-hidden relative" style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.12) 0%, var(--surface-2) 55%)', boxShadow: '0 1px 0 0 rgba(249,115,22,0.25) inset, 0 20px 60px -20px rgba(249,115,22,0.15)' }}>
-          <div className="absolute top-0 left-[10%] right-[10%] h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(249,115,22,0.5), transparent)' }} aria-hidden="true" />
-          <div className="flex flex-col lg:flex-row gap-7">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 rounded-[6px] bg-[var(--accent)] flex items-center justify-center text-white text-[13px] font-bold">+</div>
-                <span className="text-[10.5px] font-semibold text-[#FDBA74] tracking-[0.1em] uppercase">Austral Intelligence</span>
-              </div>
-              <h2 className="text-[30px] md:text-[42px] font-bold text-white leading-[1.12] tracking-tight mb-3">
-                {goalMet ? (
-                  <>Superaste tu objetivo con <span className="text-[#FDBA74]">{formatCurrency(m?.monthlyRevenue ?? 0)}</span> este mes.</>
-                ) : (
-                  <>Facturaste <span className="text-[#FDBA74]">{formatCurrency(m?.monthlyRevenue ?? 0)}</span> este mes.</>
-                )}
-              </h2>
-              <p className="text-[13px] text-[var(--text-2)] leading-[1.6] max-w-[520px] mb-5">
-                <BoldText text={topAlertText} />
-              </p>
-              <div className="flex flex-wrap items-center gap-3 mb-6">
-                <a href="/crm" className="flex items-center gap-[6px] px-4 py-2 rounded-[8px] text-[12.5px] font-semibold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-all">
-                  Ver leads calientes
-                </a>
-                <a href="/metricas" className="flex items-center gap-[6px] text-[12.5px] font-medium text-[var(--text-2)] hover:text-white transition-all">
-                  Ver análisis completo <i className="ti ti-arrow-right text-[13px]" aria-hidden="true" />
-                </a>
-              </div>
-              <div className="flex flex-wrap gap-6 pt-5 border-t border-white/[0.06]">
-                <div>
-                  <div className="text-[19px] font-bold text-white font-mono">{m?.activeLeads ?? 0}</div>
-                  <div className="text-[10.5px] text-[var(--text-3)]">leads activos</div>
-                </div>
-                <div>
-                  <div className="text-[19px] font-bold text-white font-mono">{m?.avgCloseDays != null ? Math.round(m.avgCloseDays) : '—'}</div>
-                  <div className="text-[10.5px] text-[var(--text-3)]">días prom. de cierre</div>
-                </div>
-                <div>
-                  <div className="text-[19px] font-bold text-white font-mono">{m?.hotLeads ?? 0}</div>
-                  <div className="text-[10.5px] text-[var(--text-3)]">leads calientes 🔥</div>
-                </div>
-              </div>
-            </div>
+      <section className="apple-reveal apple-delay-2 mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"><Kpi title="Ingresos del mes" value={formatCurrency(m?.monthlyRevenue??0)} detail={`Objetivo ${formatCurrency(m?.monthlyGoal??0)}`} icon="ti-currency-dollar" trend={m?.revenueDelta}/><Kpi title="Nuevas oportunidades" value={String(m?.newLeadsThisMonth??0)} detail={`${m?.activeLeads??0} leads activos`} icon="ti-users" trend={m?.newLeadsDelta}/><Kpi title="Conversión comercial" value={`${(m?.closeRate??0).toFixed(0)}%`} detail="Tasa de cierre global" icon="ti-chart-dots-3"/><Kpi title="Ticket promedio" value={formatCurrency(m?.avgTicket??0)} detail="Por negocio ganado" icon="ti-receipt"/></section>
 
-            {/* Score panel */}
-            <div className="lg:w-[270px] lg:shrink-0 bg-black/20 border border-white/[0.06] rounded-[14px] p-5 flex flex-col items-center">
-              <div className="w-full flex items-start justify-between mb-5">
-                <div>
-                  <div className="text-[9.5px] font-semibold text-[var(--text-3)] tracking-[0.1em] uppercase mb-[3px]">Salud comercial</div>
-                  <div className="text-[13px] font-semibold text-white">Puntaje comercial</div>
-                </div>
-                {m && (() => {
-                  const status = statusFor(m.businessScore)
-                  return (
-                    <span className="text-[9.5px] font-semibold px-2 py-[3px] rounded-full whitespace-nowrap shrink-0" style={{ background: status.bg, color: status.color }}>
-                      {status.label}
-                    </span>
-                  )
-                })()}
-              </div>
-              <ScoreRing score={m?.businessScore ?? 0} showBadge={false} />
-              <div className="w-full mt-6 space-y-3">
-                {(m?.businessScoreBreakdown ?? []).map(item => (
-                  <div key={item.label}>
-                    <div className="flex items-center justify-between text-[10.5px] mb-1">
-                      <span className="text-[var(--text-3)]">{item.label}</span>
-                      <span className="text-[var(--text-2)] font-mono font-medium">{item.value}</span>
-                    </div>
-                    <div className="h-[4px] bg-white/[0.06] rounded-full overflow-hidden">
-                      <div className="h-full rounded-full bg-gradient-to-r from-[var(--accent-hover)] to-[var(--accent)]" style={{ width: `${item.value}%`, transition: 'width 1s ease' }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+      <section className="apple-reveal apple-delay-3 mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[1.15fr_.85fr]">
+        <article className="apple-card p-6 md:p-7"><div className="mb-7 flex items-start justify-between"><div><p className="text-[10px] uppercase tracking-[.15em] text-zinc-600">Facturación</p><h3 className="mt-2 text-base font-semibold text-white">Evolución {new Date().getFullYear()}</h3></div><span className="rounded-full border border-white/[.06] px-3 py-1 text-[9px] text-zinc-500">USD</span></div><div className="h-[235px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={m?.monthlyChart??[]} barCategoryGap="32%"><XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill:'#6e6e73',fontSize:10}} dy={10}/><Tooltip cursor={{fill:'rgba(255,255,255,.025)'}} content={<Tip/>}/><Bar dataKey="revenue" fill="#f5f5f7" radius={[8,8,8,8]}/></BarChart></ResponsiveContainer></div></article>
+        <article className="apple-card p-6 md:p-7"><p className="text-[10px] uppercase tracking-[.15em] text-zinc-600">Pipeline</p><h3 className="mt-2 text-base font-semibold text-white">Embudo comercial</h3><div className="mt-7 space-y-4">{(m?.funnelData??[]).filter(x=>!['WON','LOST'].includes(x.stage)).slice(0,6).map((x,i)=>{const max=Math.max(...(m?.funnelData??[]).map(y=>y.count),1);return <div key={x.stage}><div className="mb-2 flex justify-between text-[10px]"><span className="text-zinc-400">{x.label}</span><span className="font-mono text-zinc-500">{x.count}</span></div><div className="h-2 overflow-hidden rounded-full bg-white/[.05]"><div className="h-full rounded-full" style={{width:`${Math.max(x.count/max*100,3)}%`,background:stageColors[i]}}/></div></div>})}</div></article>
+      </section>
 
-        {/* KPI row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[12px] p-4 transition-all hover:border-[var(--border-2)]">
-            <div className="flex items-center justify-between mb-2">
-              <div className="w-7 h-7 rounded-full bg-[rgba(16,185,129,0.12)] text-[var(--green)] flex items-center justify-center"><i className="ti ti-currency-dollar text-[14px]" aria-hidden="true" /></div>
-              <DeltaBadge value={m?.revenueDelta ?? null} />
-            </div>
-            <div className="text-[10.5px] text-[var(--text-3)] font-medium mb-[2px]">Ingresos del mes</div>
-            <div className="text-[24px] font-bold text-[var(--text)] font-mono tracking-tight">{formatCurrency(m?.monthlyRevenue ?? 0)}</div>
-            <div className="text-[11px] text-[var(--text-3)] mt-1">de {formatCurrency(m?.monthlyGoal ?? 0)} objetivo</div>
-          </div>
-          <div className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[12px] p-4 transition-all hover:border-[var(--border-2)]">
-            <div className="flex items-center justify-between mb-2">
-              <div className="w-7 h-7 rounded-full bg-[rgba(249,115,22,0.12)] text-[#FDBA74] flex items-center justify-center"><i className="ti ti-users text-[14px]" aria-hidden="true" /></div>
-              {m?.newLeadsDelta != null && (
-                <span className={`text-[10.5px] font-semibold px-1.5 py-[1px] rounded-full ${m.newLeadsDelta >= 0 ? 'text-[var(--green)] bg-[rgba(16,185,129,0.12)]' : 'text-[#FCA5A5] bg-[rgba(239,68,68,0.12)]'}`}>
-                  {m.newLeadsDelta >= 0 ? '+' : ''}{m.newLeadsDelta}
-                </span>
-              )}
-            </div>
-            <div className="text-[10.5px] text-[var(--text-3)] font-medium mb-[2px]">Leads nuevos</div>
-            <div className="text-[24px] font-bold text-[var(--text)] font-mono tracking-tight">{m?.newLeadsThisMonth ?? 0}</div>
-            <div className="text-[11px] text-[var(--text-3)] mt-1">este mes</div>
-          </div>
-          <div className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[12px] p-4 transition-all hover:border-[var(--border-2)]">
-            <div className="flex items-center justify-between mb-2">
-              <div className="w-7 h-7 rounded-full bg-[rgba(59,130,246,0.12)] text-[#93C5FD] flex items-center justify-center"><i className="ti ti-percentage text-[14px]" aria-hidden="true" /></div>
-            </div>
-            <div className="text-[10.5px] text-[var(--text-3)] font-medium mb-[2px]">Tasa de cierre</div>
-            <div className="text-[24px] font-bold text-[var(--text)] font-mono tracking-tight">{(m?.closeRate ?? 0).toFixed(0)}%</div>
-            <div className="text-[11px] text-[var(--text-3)] mt-1">de todos tus leads</div>
-          </div>
-          <div className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[12px] p-4 transition-all hover:border-[var(--border-2)]">
-            <div className="flex items-center justify-between mb-2">
-              <div className="w-7 h-7 rounded-full bg-[rgba(245,158,11,0.12)] text-[var(--amber)] flex items-center justify-center"><i className="ti ti-receipt text-[14px]" aria-hidden="true" /></div>
-            </div>
-            <div className="text-[10.5px] text-[var(--text-3)] font-medium mb-[2px]">Ticket promedio</div>
-            <div className="text-[24px] font-bold text-[var(--text)] font-mono tracking-tight">{formatCurrency(m?.avgTicket ?? 0)}</div>
-            <div className="text-[11px] text-[var(--text-3)] mt-1">por negocio ganado</div>
-          </div>
-        </div>
-
-        {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[12px] p-5">
-            <div className="text-[13px] font-semibold text-[var(--text)] mb-4">Embudo de conversión</div>
-            <div className="space-y-2">
-              {(m?.funnelData ?? []).filter(f => !['WON','LOST'].includes(f.stage)).map((stage, i) => (
-                <div key={stage.stage} className="flex items-center gap-3">
-                  <div className="w-[100px] text-[11.5px] text-[var(--text-2)] shrink-0">{stage.label}</div>
-                  <div className="flex-1 h-[22px] rounded-[4px] flex items-center pl-2" style={{ background: STAGE_COLORS[i], width: `${Math.max((stage.count / ((m?.funnelData[0]?.count) ?? 1)) * 180, 30)}px`, minWidth: 30 }}>
-                    <span className="text-[11px] font-semibold text-white">{stage.count}</span>
-                  </div>
-                  <div className="text-[11.5px] text-[var(--text-3)] font-mono w-8 text-right">{stage.count}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[12px] p-5">
-            <div className="text-[13px] font-semibold text-[var(--text)] mb-4">Facturación {new Date().getFullYear()}</div>
-            <ResponsiveContainer width="100%" height={160}>
-              <BarChart data={m?.monthlyChart ?? []} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                <XAxis dataKey="month" tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}`} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="revenue" name="Ingresos" fill="#F97316" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Bottom Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[12px] p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="text-[13px] font-semibold text-[var(--text)]">Próximos seguimientos</div>
-            </div>
-            <div className="space-y-1">
-              {(m?.upcomingFollowUps ?? []).length === 0 && (
-                <div className="text-[12px] text-[var(--text-3)] py-3">No tenés seguimientos programados en los próximos días.</div>
-              )}
-              {(m?.upcomingFollowUps ?? []).map(lead => (
-                <div key={lead.id} className="flex items-center gap-3 px-3 py-[9px] rounded-[7px] hover:bg-[var(--surface-3)] cursor-pointer transition-all">
-                  <div className="w-[30px] h-[30px] rounded-full bg-[var(--accent)] flex items-center justify-center text-[11px] font-semibold text-white shrink-0">
-                    {lead.companyName.slice(0,2).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[12.5px] font-medium text-[var(--text)] truncate">{lead.companyName}</div>
-                    <div className="text-[11px] text-[var(--text-3)]">{lead.nextFollowUpAt ? formatRelativeTime(lead.nextFollowUpAt) : 'Pendiente'}</div>
-                  </div>
-                  <span className={`text-[10.5px] px-2 py-[2px] rounded-full font-medium ${
-                    lead.isHot ? 'bg-[rgba(249,115,22,0.12)] text-[#FDBA74] border border-[rgba(249,115,22,0.2)]'
-                    : 'bg-[var(--surface-3)] text-[var(--text-2)] border border-[var(--border-2)]'
-                  }`}>
-                    {lead.isHot ? '🔥 Caliente' : lead.stage}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-[rgba(245,158,11,0.06)] border border-[rgba(245,158,11,0.18)] rounded-[12px] p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-7 h-7 rounded-[7px] bg-[rgba(245,158,11,0.15)] flex items-center justify-center text-[var(--amber)] text-[14px]">
-                <i className="ti ti-brain" aria-hidden="true" />
-              </div>
-              <div>
-                <div className="text-[12.5px] font-semibold text-[var(--text)]">IA Comercial · Alertas</div>
-                <div className="text-[10.5px] text-[var(--text-3)]">Calculado en base a tu pipeline actual</div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              {(m?.alerts ?? []).map((alert, i) => {
-                const meta = ALERT_META[alert.type]
-                return (
-                  <div key={i} className="flex items-start gap-2 py-2 border-b border-[rgba(245,158,11,0.1)] last:border-0 last:pb-0">
-                    <div className="w-[22px] h-[22px] rounded-[5px] flex items-center justify-center text-[12px] shrink-0 mt-[1px]" style={{ background: meta.color, color: meta.iconColor }}>
-                      <i className={`ti ${meta.icon}`} aria-hidden="true" />
-                    </div>
-                    <BoldText text={alert.text} className="text-[12px] text-[var(--text-2)] leading-[1.5]" />
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <LeadFormModal open={modalOpen} onClose={() => setModalOpen(false)} />
-    </>
-  )
+      <section className="apple-reveal apple-delay-3 mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <article className="apple-card p-6 md:p-7"><div className="mb-5 flex items-center justify-between"><div><p className="text-[10px] uppercase tracking-[.15em] text-zinc-600">Agenda</p><h3 className="mt-2 text-base font-semibold text-white">Próximos seguimientos</h3></div><a href="/crm" className="text-[10px] text-zinc-500 hover:text-white">Ver todos <i className="ti ti-arrow-right"/></a></div><div className="space-y-2">{!(m?.upcomingFollowUps??[]).length&&<div className="rounded-2xl bg-white/[.025] p-6 text-center text-[11px] text-zinc-600">No hay seguimientos próximos.</div>}{(m?.upcomingFollowUps??[]).map(x=><div key={x.id} className="flex items-center gap-3 rounded-2xl p-3 transition hover:bg-white/[.035]"><div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-zinc-600 to-zinc-800 text-[10px] font-semibold text-white">{x.companyName.slice(0,2).toUpperCase()}</div><div className="min-w-0 flex-1"><p className="truncate text-[11px] font-medium text-white">{x.companyName}</p><p className="mt-1 text-[9.5px] text-zinc-600">{x.nextFollowUpAt?formatRelativeTime(x.nextFollowUpAt):'Pendiente'}</p></div>{x.isHot&&<span className="rounded-full bg-orange-400/10 px-2 py-1 text-[9px] text-orange-300">Prioridad</span>}</div>)}</div></article>
+        <article className="apple-card relative overflow-hidden p-6 md:p-7"><div className="absolute -right-14 -top-14 h-52 w-52 rounded-full bg-violet-500/[.08] blur-3xl"/><div className="relative"><div className="mb-5 flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-[13px] bg-gradient-to-br from-violet-400 to-indigo-600 text-white shadow-lg shadow-violet-900/20"><i className="ti ti-sparkles"/></div><div><p className="text-[10px] uppercase tracking-[.15em] text-zinc-600">Inteligencia comercial</p><h3 className="mt-1 text-base font-semibold text-white">Alertas importantes</h3></div></div><div className="space-y-2">{(m?.alerts??[]).map((x,i)=><div key={i} className="flex gap-3 rounded-2xl border border-white/[.045] bg-white/[.025] p-4"><i className={`ti ${alertIcons[x.type]} mt-0.5 text-sm text-zinc-400`}/><BoldText text={x.text} className="text-[11px] leading-5 text-zinc-400"/></div>)}</div></div></article>
+      </section>
+    </div></div><LeadFormModal open={modalOpen} onClose={()=>setModalOpen(false)}/>
+  </>
 }
