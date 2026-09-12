@@ -3,7 +3,7 @@ interface CardProps { children: React.ReactNode; className?: string; accentColor
 export function Card({ children, className, accentColor, padding="md" }: CardProps) {
   const p = {sm:"p-3",md:"p-4",lg:"p-5"}[padding];
   return (
-    <div className={cn("rounded-[10px] relative overflow-hidden",p,className)} style={{background:"var(--surface)",border:"1px solid var(--border)"}}>
+    <div className={cn("future-panel relative overflow-hidden",p,className)}>
       {accentColor && <div className="absolute top-0 left-0 right-0 h-[3px]" style={{background:accentColor}}/>}
       {children}
     </div>
