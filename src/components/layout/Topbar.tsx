@@ -13,7 +13,7 @@ export function Topbar({ title, subtitle, primaryAction }: TopbarProps) {
   const { toggle, openSearch } = useSidebar()
 
   return (
-    <header className="h-[68px] border-b border-[var(--border)] flex items-center px-3 md:px-6 gap-2 md:gap-4 bg-black/65 backdrop-blur-xl flex-shrink-0 sticky top-0 z-30">
+    <header className="h-[72px] border-b border-white/[.065] flex items-center px-3 md:px-7 gap-2 md:gap-4 bg-[#0b0b0d]/75 backdrop-blur-2xl flex-shrink-0 sticky top-0 z-30">
       <button
         onClick={toggle}
         className="md:hidden p-1.5 -ml-1 rounded-[6px] text-[var(--text-2)] hover:bg-[var(--surface-3)] shrink-0"
@@ -30,7 +30,7 @@ export function Topbar({ title, subtitle, primaryAction }: TopbarProps) {
       <div className="flex-1 hidden md:flex justify-center px-6">
         <button
           onClick={openSearch}
-          className="w-full max-w-[420px] flex items-center gap-2.5 px-4 py-[9px] rounded-xl text-[12px] text-[var(--text-3)] bg-white/[.035] border border-white/[.08] hover:border-[var(--accent)]/40 hover:bg-white/[.06] transition-all"
+          className="w-full max-w-[410px] flex items-center gap-2.5 px-4 py-[10px] rounded-[13px] text-[12px] text-[var(--text-3)] bg-white/[.055] border border-white/[.075] hover:bg-white/[.08] transition-all duration-300"
         >
           <i className="ti ti-search text-[14px]" aria-hidden="true" />
           <span className="flex-1 text-left">Buscar leads, movimientos, proyectos...</span>
@@ -49,7 +49,7 @@ export function Topbar({ title, subtitle, primaryAction }: TopbarProps) {
       {primaryAction && (
         <button
           onClick={primaryAction.onClick}
-          className="flex items-center gap-[6px] px-[11px] md:px-[16px] py-[8px] rounded-[10px] text-[12px] font-semibold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-all border border-orange-400/20 shadow-[0_8px_24px_rgba(255,106,0,.22)] shrink-0 whitespace-nowrap"
+          className="flex items-center gap-[6px] px-[11px] md:px-[17px] py-[9px] rounded-full text-[12px] font-semibold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] hover:scale-[1.02] active:scale-[.98] transition-all duration-300 shadow-[0_6px_20px_rgba(255,122,26,.18)] shrink-0 whitespace-nowrap"
         >
           <i className="ti ti-plus text-[14px]" aria-hidden="true" />
           <span className="hidden sm:inline">{primaryAction.label}</span>
