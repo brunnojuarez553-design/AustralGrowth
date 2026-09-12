@@ -73,12 +73,12 @@ export function CommandPalette() {
   return (
     <div
       className="fixed inset-0 z-[60] flex items-start justify-center pt-[12vh] px-4"
-      style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(3px)' }}
+      style={{ background: 'rgba(3,3,5,.72)', backdropFilter: 'blur(20px) saturate(120%)' }}
       onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}
     >
       <div
-        className="w-full max-w-[560px] rounded-[14px] overflow-hidden"
-        style={{ background: 'var(--surface)', border: '1px solid var(--border-2)', boxShadow: '0 24px 70px rgba(0,0,0,0.55)' }}
+        className="w-full max-w-[600px] rounded-[24px] overflow-hidden future-enter"
+        style={{ background: 'linear-gradient(145deg,rgba(33,33,37,.98),rgba(17,17,20,.98))', border: '1px solid rgba(255,255,255,.11)', boxShadow: 'inset 0 1px rgba(255,255,255,.06),0 35px 100px rgba(0,0,0,.65)' }}
       >
         <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[var(--border)]">
           <i className="ti ti-search text-[16px] text-[var(--text-3)]" aria-hidden="true" />
