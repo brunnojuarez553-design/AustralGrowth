@@ -1,90 +1,54 @@
 'use client'
+
+import { Area, AreaChart, CartesianGrid, PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Topbar } from '@/components/layout/Topbar'
 import { useDashboard } from '@/hooks/useDashboard'
 import { formatCurrency } from '@/lib/utils'
 
-const INDUSTRY_COLORS = ['#F97316', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6']
+const COLORS=['#ff7a1a','#8b5cf6','#22d3ee','#34d399','#fbbf24']
+const stageNames:Record<string,string>={DETECTED:'Detectados',CONTACTED:'Contactados',REPLIED:'Respondieron',MEETING:'Reunión',DEMO:'Demo',PROPOSAL:'Propuesta',NEGOTIATION:'Negociación',WON:'Ganados'}
 
-export default function MetricasPage() {
-  const { data: m, isLoading, isError, error } = useDashboard()
+function OrbitalMetric({label,value,percent,color,icon,detail,delay=0}:{label:string;value:string;percent:number;color:string;icon:string;detail:string;delay?:number}){
+  const pct=Math.max(0,Math.min(100,percent))
+  return <article className="future-panel metric-orbit-card" style={{animationDelay:`${delay}ms`}}>
+    <div className="metric-grid"/><div className="relative z-10 flex items-start justify-between"><div><p className="future-label">{label}</p><p className="mt-3 font-mono text-[31px] font-semibold tracking-[-.06em] text-white">{value}</p><p className="mt-1 text-[10px] text-zinc-600">{detail}</p></div><div className="relative grid h-[74px] w-[74px] place-items-center"><div className="absolute inset-0 rounded-full opacity-25 blur-xl" style={{background:color}}/><div className="metric-ring absolute inset-0 rounded-full" style={{background:`conic-gradient(${color} ${pct}%,rgba(255,255,255,.06) 0)`}}/><div className="absolute inset-[6px] grid place-items-center rounded-full bg-[#171719] shadow-[inset_0_0_18px_rgba(0,0,0,.7)]"><i className={`ti ${icon} text-[18px]`} style={{color}}/></div><span className="absolute -bottom-1 rounded-full border border-white/[.08] bg-[#1e1e21] px-1.5 py-0.5 font-mono text-[8px] text-zinc-400">{Math.round(pct)}%</span></div></div>
+    <div className="relative z-10 mt-6 h-px overflow-hidden bg-white/[.055]"><div className="metric-beam h-full" style={{width:`${pct}%`,background:color}}/></div>
+  </article>
+}
 
-  const byIndustry = (m?.revenueByIndustry ?? []).map((item, i) => ({
-    label: item.industry,
-    pct: Math.round(item.closeRate),
-    color: INDUSTRY_COLORS[i % INDUSTRY_COLORS.length],
-  }))
+function HoloTooltip({active,payload,label}:any){return active&&payload?.length?<div className="rounded-xl border border-cyan-300/15 bg-[#111217]/95 px-3 py-2 shadow-[0_15px_50px_rgba(0,0,0,.5)] backdrop-blur-2xl"><p className="text-[9px] uppercase tracking-widest text-zinc-600">{label}</p>{payload.map((x:any)=><p key={x.name} className="mt-1 text-[11px]" style={{color:x.color}}>{x.name}: {formatCurrency(x.value)}</p>)}</div>:null}
 
-  const stageLabels: Record<string, string> = {
-    DETECTED: 'Detectado', CONTACTED: 'Contactado', REPLIED: 'Respondió',
-    MEETING: 'Reunión', DEMO: 'Demo', PROPOSAL: 'Propuesta',
-    NEGOTIATION: 'Negociación', WON: 'Ganado',
-  }
-  const byStage = (m?.funnelData ?? [])
-    .filter(s => s.stage !== 'LOST' && s.conversionRate != null)
-    .map((s, i, arr) => ({
-      label: `${stageLabels[arr[i - 1]?.stage] ?? '—'} → ${stageLabels[s.stage] ?? s.stage}`,
-      pct: Math.round(s.conversionRate ?? 0),
-    }))
+export default function MetricasPage(){
+  const {data:m,isLoading,isError,error}=useDashboard()
+  const industries=(m?.revenueByIndustry??[]).map((x,i)=>({subject:x.industry||'Sin rubro',conversion:Math.round(x.closeRate),leads:x.leads,fullMark:100,color:COLORS[i%COLORS.length]}))
+  const stages=(m?.funnelData??[]).filter(x=>x.stage!=='LOST').slice(0,8)
+  const maxStage=Math.max(...stages.map(x=>x.count),1)
+  const velocity=m?.avgCloseDays?Math.max(0,100-Math.min(m.avgCloseDays,60)/60*100):0
+  const roiPct=m?.roi?Math.min(m.roi/5*100,100):0
 
-  return (
-    <>
-      <Topbar title="Centro de Métricas" subtitle="Rendimiento comercial completo" />
-      <div className="flex-1 overflow-y-auto p-5 space-y-4">
-        {isError && (
-          <div className="text-[12.5px] rounded-[8px] px-4 py-3" style={{ background: 'rgba(239,68,68,0.1)', color: '#FCA5A5', border: '1px solid rgba(239,68,68,0.2)' }}>
-            No se pudieron cargar las métricas: {(error as Error)?.message}
-          </div>
-        )}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            { label: 'Conversión total', value: `${(m?.closeRate ?? 0).toFixed(0)}%` },
-            { label: 'Tiempo prom. cierre', value: m?.avgCloseDays != null ? `${Math.round(m.avgCloseDays)} días` : '—' },
-            { label: 'ROI comercial', value: m?.roi != null ? `${m.roi.toFixed(1)}x` : '—', green: true },
-            { label: 'Ticket promedio', value: formatCurrency(m?.avgTicket ?? 0) },
-          ].map((k, i) => (
-            <div key={i} className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[10px] p-4">
-              <div className="text-[10.5px] text-[var(--text-3)] mb-[6px]">{k.label}</div>
-              <div className={`text-[22px] font-bold font-mono tracking-tight ${k.green ? 'text-[var(--green)]' : 'text-[var(--text)]'}`}>{isLoading ? '...' : k.value}</div>
-            </div>
-          ))}
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] p-4">
-            <div className="text-[13px] font-semibold text-[var(--text)] mb-4">Conversión por rubro</div>
-            <div className="space-y-0">
-              {byIndustry.length === 0 && !isLoading && (
-                <div className="text-[12px] text-[var(--text-3)] py-4 text-center">Todavía no hay leads con rubro cargado.</div>
-              )}
-              {byIndustry.map(item => (
-                <div key={item.label} className="flex items-center gap-3 py-[7px] border-b border-[var(--border)] last:border-0">
-                  <div className="w-[85px] sm:w-[110px] text-[11px] sm:text-[12px] text-[var(--text-2)] shrink-0 truncate">{item.label}</div>
-                  <div className="flex-1 h-[5px] bg-[var(--surface-3)] rounded-full overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${item.pct}%`, background: item.color }} />
-                  </div>
-                  <div className="w-10 text-right text-[11.5px] font-mono text-[var(--text)]">{item.pct}%</div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] p-4">
-            <div className="text-[13px] font-semibold text-[var(--text)] mb-4">Conversión por etapa</div>
-            <div className="space-y-0">
-              {byStage.length === 0 && !isLoading && (
-                <div className="text-[12px] text-[var(--text-3)] py-4 text-center">Todavía no hay suficientes leads para calcular el embudo.</div>
-              )}
-              {byStage.map(item => (
-                <div key={item.label} className="flex items-center gap-3 py-[7px] border-b border-[var(--border)] last:border-0">
-                  <div className="w-[120px] sm:w-[160px] text-[11px] sm:text-[12px] text-[var(--text-2)] shrink-0 truncate">{item.label}</div>
-                  <div className="flex-1 h-[5px] bg-[var(--surface-3)] rounded-full overflow-hidden">
-                    <div className="h-full rounded-full bg-[var(--accent)]" style={{ width: `${item.pct}%` }} />
-                  </div>
-                  <div className="w-10 text-right text-[11.5px] font-mono text-[var(--text)]">{item.pct}%</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
-  )
+  if(isLoading)return <div className="flex flex-1 items-center justify-center bg-[#09090b]"><div className="future-loader"><span/><span/><span/></div></div>
+  return <>
+    <Topbar title="Growth Intelligence" subtitle="Sistema de métricas avanzadas"/>
+    <main className="future-canvas flex-1 overflow-y-auto"><div className="mx-auto max-w-[1500px] space-y-5 px-4 pb-16 pt-8 md:px-9 md:pt-10">
+      {isError&&<div className="rounded-2xl border border-rose-400/15 bg-rose-400/[.06] p-4 text-xs text-rose-300">No se pudieron cargar las métricas: {(error as Error)?.message}</div>}
+
+      <header className="future-enter flex flex-col justify-between gap-6 md:flex-row md:items-end"><div><div className="future-status"><span/>Live intelligence</div><h1 className="mt-4 max-w-[850px] text-[38px] font-semibold leading-[.98] tracking-[-.065em] text-white md:text-[64px]">El pulso comercial de <span className="future-gradient">Austral.</span></h1><p className="mt-4 max-w-2xl text-[12px] leading-6 text-zinc-500">Indicadores vivos para detectar velocidad, eficiencia y oportunidades antes de que se conviertan en problemas.</p></div><div className="flex items-center gap-2 rounded-full border border-white/[.07] bg-white/[.035] px-4 py-2.5 text-[10px] text-zinc-500"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-300"/>Datos sincronizados ahora</div></header>
+
+      <section className="future-enter future-delay-1 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"><OrbitalMetric label="Conversión global" value={`${(m?.closeRate??0).toFixed(1)}%`} percent={m?.closeRate??0} color="#ff7a1a" icon="ti-chart-dots-3" detail="Eficiencia del pipeline"/><OrbitalMetric label="Velocidad comercial" value={m?.avgCloseDays!=null?`${Math.round(m.avgCloseDays)} días`:'—'} percent={velocity} color="#22d3ee" icon="ti-bolt" detail="Tiempo promedio de cierre" delay={80}/><OrbitalMetric label="Retorno comercial" value={m?.roi!=null?`${m.roi.toFixed(1)}×`:'—'} percent={roiPct} color="#a78bfa" icon="ti-infinity" detail="ROI estimado" delay={160}/><OrbitalMetric label="Valor por cierre" value={formatCurrency(m?.avgTicket??0)} percent={Math.min((m?.avgTicket??0)/(m?.monthlyGoal||1)*100,100)} color="#34d399" icon="ti-diamond" detail="Ticket promedio" delay={240}/></section>
+
+      <section className="future-enter future-delay-2 grid grid-cols-1 gap-4 xl:grid-cols-[1.35fr_.65fr]">
+        <article className="future-panel relative min-h-[430px] overflow-hidden p-6 md:p-8"><div className="scan-line"/><div className="relative z-10 flex items-start justify-between"><div><p className="future-label">Revenue signal</p><h2 className="mt-2 text-xl font-semibold tracking-[-.035em] text-white">Trayectoria financiera</h2></div><span className="rounded-full border border-white/[.07] bg-white/[.035] px-3 py-1.5 text-[9px] uppercase tracking-widest text-zinc-500">12 meses</span></div><div className="relative z-10 mt-8 h-[310px]"><ResponsiveContainer width="100%" height="100%"><AreaChart data={m?.monthlyChart??[]} margin={{top:10,right:4,left:-15,bottom:0}}><defs><linearGradient id="neonRevenue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ff7a1a" stopOpacity=".42"/><stop offset=".55" stopColor="#a855f7" stopOpacity=".1"/><stop offset="1" stopColor="#09090b" stopOpacity="0"/></linearGradient><filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><CartesianGrid vertical={false} stroke="rgba(255,255,255,.045)" strokeDasharray="2 8"/><XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill:'#52525b',fontSize:9}} dy={12}/><YAxis axisLine={false} tickLine={false} tick={{fill:'#3f3f46',fontSize:9}} tickFormatter={v=>`$${v}`}/><Tooltip content={<HoloTooltip/>}/><Area type="monotone" dataKey="revenue" name="Ingresos" stroke="#ff8a33" strokeWidth={2.5} fill="url(#neonRevenue)" filter="url(#glow)"/></AreaChart></ResponsiveContainer></div></article>
+
+        <article className="future-panel relative min-h-[430px] overflow-hidden p-6 md:p-8"><div className="radar-glow"/><div className="relative z-10"><p className="future-label">Market radar</p><h2 className="mt-2 text-xl font-semibold tracking-[-.035em] text-white">Conversión por rubro</h2><p className="mt-2 text-[10px] text-zinc-600">Distribución de efectividad comercial</p></div>{industries.length?<div className="relative z-10 mt-5 h-[295px]"><ResponsiveContainer width="100%" height="100%"><RadarChart data={industries} outerRadius="68%"><PolarGrid stroke="rgba(255,255,255,.09)"/><PolarAngleAxis dataKey="subject" tick={{fill:'#71717a',fontSize:9}}/><Radar dataKey="conversion" stroke="#22d3ee" strokeWidth={2} fill="#22d3ee" fillOpacity={.13}/></RadarChart></ResponsiveContainer></div>:<div className="relative z-10 grid h-[290px] place-items-center text-center"><div><i className="ti ti-radar text-3xl text-zinc-700"/><p className="mt-3 text-[11px] text-zinc-600">Agregá rubros a tus leads para activar el radar.</p></div></div>}</article>
+      </section>
+
+      <section className="future-enter future-delay-3 grid grid-cols-1 gap-4 xl:grid-cols-[.72fr_1.28fr]">
+        <article className="future-panel p-6 md:p-8"><div className="flex items-center justify-between"><div><p className="future-label">Core score</p><h2 className="mt-2 text-xl font-semibold text-white">Índice de crecimiento</h2></div><span className="rounded-full bg-orange-400/10 px-3 py-1.5 text-[9px] text-orange-300">{m?.businessScore??0}/100</span></div><div className="growth-core mx-auto my-8" style={{'--score':`${m?.businessScore??0}%`} as React.CSSProperties}><div className="core-orbit orbit-one"><i/></div><div className="core-orbit orbit-two"><i/></div><div className="core-center"><strong>{Math.round(m?.businessScore??0)}</strong><span>Growth</span></div></div><div className="space-y-3">{(m?.businessScoreBreakdown??[]).map((x,i)=><div key={x.label} className="grid grid-cols-[110px_1fr_32px] items-center gap-3"><span className="truncate text-[9.5px] text-zinc-500">{x.label}</span><div className="h-1 overflow-hidden rounded-full bg-white/[.05]"><div className="energy-bar h-full rounded-full" style={{width:`${x.value}%`,animationDelay:`${i*100}ms`}}/></div><span className="text-right font-mono text-[9px] text-zinc-600">{x.value}</span></div>)}</div></article>
+
+        <article className="future-panel p-6 md:p-8"><div><p className="future-label">Conversion matrix</p><h2 className="mt-2 text-xl font-semibold text-white">Flujo por etapas</h2><p className="mt-2 text-[10px] text-zinc-600">Volumen y pérdida de energía en cada punto del proceso.</p></div><div className="mt-8 space-y-3">{stages.map((x,i)=>{const width=Math.max(x.count/maxStage*100,2);return <div key={x.stage} className="group grid grid-cols-[95px_1fr_42px] items-center gap-4"><span className="truncate text-[10px] text-zinc-500">{stageNames[x.stage]??x.label}</span><div className="relative h-9 overflow-hidden rounded-xl border border-white/[.045] bg-black/20"><div className="stage-signal absolute inset-y-0 left-0 rounded-xl" style={{width:`${width}%`,'--signal':COLORS[i%COLORS.length],animationDelay:`${i*80}ms`} as React.CSSProperties}/><div className="absolute inset-0 opacity-0 transition group-hover:opacity-100" style={{background:'linear-gradient(90deg,transparent,rgba(255,255,255,.025),transparent)'}}/></div><span className="font-mono text-[11px] text-zinc-400">{x.count}</span></div>})}{!stages.length&&<div className="py-16 text-center text-[11px] text-zinc-600">Todavía no hay actividad suficiente en el pipeline.</div>}</div></article>
+      </section>
+
+      <section className="future-enter future-delay-3 grid grid-cols-1 gap-4 md:grid-cols-3"><article className="future-panel p-6"><div className="flex items-center gap-3"><div className="future-icon violet"><i className="ti ti-activity-heartbeat"/></div><div><p className="future-label">Pipeline ponderado</p><p className="mt-1 font-mono text-xl font-semibold text-white">{formatCurrency(m?.weightedPipelineValue??0)}</p></div></div></article><article className="future-panel p-6"><div className="flex items-center gap-3"><div className="future-icon cyan"><i className="ti ti-users-group"/></div><div><p className="future-label">Leads activos</p><p className="mt-1 font-mono text-xl font-semibold text-white">{m?.activeLeads??0}</p></div></div></article><article className="future-panel p-6"><div className="flex items-center gap-3"><div className="future-icon orange"><i className="ti ti-flame"/></div><div><p className="future-label">Oportunidades críticas</p><p className="mt-1 font-mono text-xl font-semibold text-white">{m?.hotLeads??0}</p></div></div></article></section>
+    </div></main>
+  </>
 }
