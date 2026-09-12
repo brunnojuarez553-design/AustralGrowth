@@ -45,14 +45,14 @@ export function Sidebar() {
 
       <aside
         className={cn(
-          'w-[256px] min-w-[256px] bg-black/80 backdrop-blur-xl border-r border-white/[.07] flex flex-col h-screen',
+          'w-[264px] min-w-[264px] bg-[#111113]/78 backdrop-blur-2xl border-r border-white/[.065] flex flex-col h-screen',
           'fixed md:sticky top-0 left-0 z-50 md:z-auto transition-transform duration-200',
           'md:translate-x-0',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         {/* Logo */}
-        <div className="px-5 py-[20px] border-b border-white/[.06] flex items-center gap-3">
+        <div className="px-5 py-[18px] border-b border-white/[.055] flex items-center gap-3">
           <div className="relative w-9 h-9 flex items-center justify-center shrink-0 rounded-xl bg-white/[.04] border border-white/[.07] p-1.5 shadow-[0_0_30px_rgba(255,106,0,.12)]">
             <Image
               src="https://res.cloudinary.com/dgp7uhps3/image/upload/v1784260223/logo_austral_web_studio_wcitrd.png"
@@ -78,7 +78,7 @@ export function Sidebar() {
 
         {/* Studio card */}
         <div className="px-3 pt-3">
-          <div className="relative rounded-[14px] p-3.5 overflow-hidden border border-orange-400/15" style={{ background: 'radial-gradient(circle at 10% 0%, rgba(255,106,0,.18), transparent 70%), rgba(255,255,255,.025)' }}>
+          <div className="relative rounded-[16px] p-3.5 overflow-hidden border border-white/[.07]" style={{ background: 'rgba(255,255,255,.035)', boxShadow: 'inset 0 1px rgba(255,255,255,.035)' }}>
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-[10px] bg-[var(--accent)] shadow-[0_8px_20px_rgba(255,106,0,.25)] flex items-center justify-center text-white text-[15px] font-bold shrink-0">
                 A
@@ -111,7 +111,7 @@ export function Sidebar() {
                     className={cn(
                       'relative flex items-center gap-[10px] px-3 py-[10px] rounded-[10px] text-[13px] md:text-[12.5px] font-normal transition-all duration-150 mb-[2px]',
                       isActive
-                        ? 'bg-gradient-to-r from-orange-500/20 to-orange-500/[.04] text-[#ffad73] font-medium border border-orange-400/10 shadow-[inset_3px_0_0_#ff6a00]'
+                        ? 'bg-white/[.095] text-white font-medium border border-white/[.075] shadow-[inset_0_1px_rgba(255,255,255,.04)]'
                         : 'text-[var(--text-2)] hover:bg-white/[.045] hover:text-white border border-transparent'
                     )}
                   >
