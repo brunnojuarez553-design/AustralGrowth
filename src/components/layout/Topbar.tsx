@@ -13,7 +13,7 @@ export function Topbar({ title, subtitle, primaryAction }: TopbarProps) {
   const { toggle, openSearch } = useSidebar()
 
   return (
-    <header className="h-[72px] border-b border-white/[.065] flex items-center px-3 md:px-7 gap-2 md:gap-4 bg-[#0b0b0d]/75 backdrop-blur-2xl flex-shrink-0 sticky top-0 z-30">
+    <header className="h-[72px] border-b border-white/[.055] flex items-center px-3 md:px-7 gap-2 md:gap-4 bg-[#0b0b0d]/72 backdrop-blur-2xl flex-shrink-0 sticky top-0 z-30">
       <button
         onClick={toggle}
         className="md:hidden p-1.5 -ml-1 rounded-[6px] text-[var(--text-2)] hover:bg-[var(--surface-3)] shrink-0"
@@ -23,7 +23,7 @@ export function Topbar({ title, subtitle, primaryAction }: TopbarProps) {
       </button>
 
       <div className="min-w-0 shrink-0">
-        <h1 className="text-[14px] md:text-[16px] font-semibold text-[var(--text)] tracking-[-.02em] truncate">{title}</h1>
+        <h1 className="text-[14px] md:text-[15px] font-semibold text-[var(--text)] tracking-[-.03em] truncate">{title}</h1>
         <p className="text-[10px] md:text-[11px] text-[var(--text-3)] truncate hidden sm:block">{subtitle}</p>
       </div>
 
