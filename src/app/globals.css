@@ -57,6 +57,40 @@ button { cursor: pointer; }
   box-shadow: 0 18px 45px rgba(0,0,0,.18), inset 0 1px rgba(255,255,255,.035);
 }
 
+.dashboard-scroll {
+  background:
+    radial-gradient(circle at 78% 8%, rgba(116, 116, 128, .10), transparent 28rem),
+    radial-gradient(circle at 8% 38%, rgba(255, 122, 26, .035), transparent 24rem),
+    #0b0b0d;
+}
+
+.apple-card {
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 26px;
+  background: linear-gradient(145deg, rgba(34,34,37,.82), rgba(23,23,25,.82));
+  box-shadow: inset 0 1px rgba(255,255,255,.045), 0 24px 70px rgba(0,0,0,.16);
+  backdrop-filter: blur(30px) saturate(135%);
+  transition: transform .35s cubic-bezier(.16,1,.3,1), border-color .35s ease, background .35s ease;
+}
+.apple-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.115); }
+.apple-hero {
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 30px;
+  background: linear-gradient(135deg, #262629 0%, #18181b 48%, #111113 100%);
+  box-shadow: inset 0 1px rgba(255,255,255,.06), 0 30px 90px rgba(0,0,0,.22);
+}
+.apple-orb {
+  position: absolute; width: 480px; height: 480px; right: -120px; top: -180px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255,190,142,.6), rgba(255,105,0,.18) 32%, rgba(105,70,255,.09) 57%, transparent 72%);
+  filter: blur(3px); opacity: .7; pointer-events: none;
+}
+.apple-gradient-text { background: linear-gradient(110deg,#fff 4%,#ffbb87 48%,#ff7a1a); -webkit-background-clip:text; background-clip:text; color:transparent; }
+@keyframes apple-reveal { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } }
+.apple-reveal { animation: apple-reveal .7s cubic-bezier(.16,1,.3,1) both; }
+.apple-delay-1 { animation-delay:.08s } .apple-delay-2 { animation-delay:.16s } .apple-delay-3 { animation-delay:.24s }
+
+@media (prefers-reduced-motion: reduce) { .apple-reveal,.austral-enter { animation:none; } .apple-card { transition:none; } }
+
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
