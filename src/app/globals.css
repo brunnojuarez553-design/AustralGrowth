@@ -5,14 +5,14 @@
 @tailwind utilities;
 
 :root {
-  --bg: #09090E;
-  --surface: #111118;
-  --surface-2: #16161F;
-  --surface-3: #1C1C2A;
-  --border: #1E1E2E;
-  --border-2: #252535;
-  --accent: #F97316;
-  --accent-hover: #EA580C;
+  --bg: #070707;
+  --surface: #0d0d0f;
+  --surface-2: #121214;
+  --surface-3: #19191c;
+  --border: rgba(255,255,255,.075);
+  --border-2: rgba(255,255,255,.13);
+  --accent: #ff6a00;
+  --accent-hover: #e95f00;
   --accent-glow: rgba(249, 115, 22, 0.35);
   --green: #10B981;
   --amber: #F59E0B;
@@ -28,10 +28,35 @@
 }
 
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(circle at 80% -10%, rgba(255,106,0,.09), transparent 28rem),
+    radial-gradient(circle at 18% 110%, rgba(255,106,0,.045), transparent 35rem),
+    var(--bg);
   color: var(--text);
   font-family: var(--font-inter), sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .18;
+  background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, black, transparent 75%);
+}
+
+a, button, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+
+@keyframes austral-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.austral-enter { animation: austral-in .45s cubic-bezier(.2,.8,.2,1) both; }
+.austral-panel {
+  background: linear-gradient(145deg, rgba(255,255,255,.035), rgba(255,255,255,.012));
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 80px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.025);
 }
 
 /* Custom scrollbar */
