@@ -62,20 +62,21 @@ export default function AutomatizacionesPage() {
         subtitle={`${activeCount} de ${automations.length} activas · ${totalRuns} ejecuciones totales`}
         primaryAction={{ label: 'Nueva automatización', onClick: () => setModalOpen(true) }}
       />
-      <div className="flex-1 overflow-y-auto p-5 space-y-3">
+      <div className="future-canvas flex-1 overflow-y-auto p-4 md:p-7 space-y-4">
         {isLoading && (
           <div className="text-center py-8 text-[12.5px] text-[var(--text-3)]">Cargando automatizaciones...</div>
         )}
 
         {!isLoading && automations.length === 0 && (
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] px-4 py-8 text-center text-[12.5px] text-[var(--text-3)]">
+          <div className="future-panel px-4 py-8 text-center text-[12.5px] text-[var(--text-3)]">
             Todavía no configuraste ninguna automatización. Podés definir reglas (por ejemplo: avisar cuando un lead
             se enfría, o cuando se gana un negocio) para tenerlas documentadas y accionarlas manualmente.
           </div>
         )}
 
         {automations.map(a => (
-          <div key={a.id} className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] p-4 flex items-center gap-4">
+          <div key={a.id} className="future-panel group overflow-hidden p-5 flex items-center gap-4">
+            <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-[15px] ${a.isActive ? 'bg-cyan-400/10 text-cyan-300' : 'bg-white/[.04] text-zinc-600'}`}><i className={`ti ${a.isActive ? 'ti-bolt' : 'ti-player-pause'} text-[18px]`} /></div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <span className="text-[13px] font-semibold text-[var(--text)]">{a.name}</span>
