@@ -63,6 +63,7 @@ export default function AutomatizacionesPage() {
         primaryAction={{ label: 'Nueva automatización', onClick: () => setModalOpen(true) }}
       />
       <div className="future-canvas flex-1 overflow-y-auto p-4 md:p-7 space-y-4">
+        <div className="module-intro"><div><div className="future-status"><span />Automation engine</div><h1>Flujos inteligentes</h1><p>Reglas que trabajan en segundo plano y mantienen activo tu proceso comercial.</p></div><i className="ti ti-automation module-orb" /></div>
         {isLoading && (
           <div className="text-center py-8 text-[12.5px] text-[var(--text-3)]">Cargando automatizaciones...</div>
         )}
