@@ -51,7 +51,7 @@ export default function ProyectosPage() {
         subtitle={`${projects.length} proyectos · ${active} en curso`}
         primaryAction={{ label: 'Nuevo proyecto', onClick: () => setModalOpen(true) }}
       />
-      <div className="flex-1 overflow-hidden flex flex-col p-5 gap-4">
+      <div className="future-canvas flex-1 overflow-hidden flex flex-col p-4 md:p-7 gap-5">
         {isLoading && (
           <div className="flex-1 flex items-center justify-center text-[13px] text-[var(--text-3)]">
             Cargando proyectos...
@@ -65,14 +65,14 @@ export default function ProyectosPage() {
                 const meta = STATUS_META[status]
                 const items = projects.filter(p => p.status === status)
                 return (
-                  <div key={status} className="flex flex-col">
+                  <div key={status} className="future-board flex flex-col">
                     <div className="flex items-center justify-between mb-3 pb-2 border-b border-[var(--border)]">
                       <span className="text-[11.5px] font-semibold" style={{ color: meta.text }}>{meta.label}</span>
                       <span className="text-[10px] font-mono text-[var(--text-3)]">{items.length}</span>
                     </div>
                     <div className="space-y-2 flex-1">
                       {items.map(project => (
-                        <div key={project.id} className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[8px] p-3">
+                        <div key={project.id} className="future-lead p-4">
                           <div className="text-[12.5px] font-medium text-[var(--text)] mb-1">{project.name}</div>
                           {project.lead?.companyName && (
                             <div className="text-[11px] text-[var(--text-3)] mb-2">{project.lead.companyName}</div>
@@ -92,7 +92,7 @@ export default function ProyectosPage() {
                         </div>
                       ))}
                       {items.length === 0 && (
-                        <div className="border-2 border-dashed border-[var(--border)] rounded-[8px] h-[70px] flex items-center justify-center">
+                        <div className="border-2 border-dashed border-[var(--border)] rounded-[16px] h-[70px] flex items-center justify-center">
                           <span className="text-[11px] text-[var(--text-3)]">Sin proyectos</span>
                         </div>
                       )}
