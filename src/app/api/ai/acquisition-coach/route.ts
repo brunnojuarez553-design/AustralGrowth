@@ -1,0 +1,16 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+import { prisma } from '@/lib/prisma'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
+
+const schema=z.object({leadId:z.string(),profile:z.record(z.unknown())})
+export async function POST(req:NextRequest){try{
+  const supabase=await createServerSupabaseClient();const {data:{session}}=await supabase.auth.getSession();if(!session?.user?.email)return NextResponse.json({error:'No autorizado'},{status:401})
+  const user=await prisma.user.findUnique({where:{email:session.user.email}});if(!user)return NextResponse.json({error:'No autorizado'},{status:401})
+  const {leadId,profile}=schema.parse(await req.json());const lead=await prisma.lead.findFirst({where:{id:leadId,workspaceId:user.workspaceId},include:{activities:{orderBy:{createdAt:'desc'},take:12},notes:{orderBy:{createdAt:'desc'},take:5}}});if(!lead)return NextResponse.json({error:'Taller no encontrado'},{status:404})
+  if(!process.env.OPENAI_API_KEY)return NextResponse.json({error:'Falta configurar OPENAI_API_KEY en Vercel'},{status:503})
+  const input=`Sos el coach de adquisición de Austral Web Studio, agencia especializada en sitios premium, SEO local y Google para talleres automotrices. Analizá este prospecto y decidí el próximo paso más efectivo. No inventes datos. No recomiendes crear una demo antes de validar necesidad, autoridad, presupuesto y urgencia.\n\nFICHA: ${JSON.stringify(profile)}\nHISTORIAL: ${lead.activities.map(a=>a.description).join(' | ')||'Sin actividad'}\nNOTAS: ${lead.notes.map(n=>n.content).join(' | ')||'Sin notas'}\n\nRespondé exclusivamente JSON con: diagnosis (string), nextStep (string), message (mensaje listo para copiar en español rioplatense), questions (array de 3 strings), score (0-100), risk (bajo|medio|alto), shouldDemo (boolean), rationale (string).`
+  const response=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${process.env.OPENAI_API_KEY}`},body:JSON.stringify({model:process.env.OPENAI_ACQUISITION_MODEL||'gpt-5-mini',input,text:{format:{type:'json_schema',name:'acquisition_advice',strict:true,schema:{type:'object',additionalProperties:false,properties:{diagnosis:{type:'string'},nextStep:{type:'string'},message:{type:'string'},questions:{type:'array',items:{type:'string'},minItems:3,maxItems:3},score:{type:'number'},risk:{type:'string',enum:['bajo','medio','alto']},shouldDemo:{type:'boolean'},rationale:{type:'string'}},required:['diagnosis','nextStep','message','questions','score','risk','shouldDemo','rationale']}}}})})
+  const data=await response.json();if(!response.ok)throw new Error(data?.error?.message||'OpenAI no respondió');const output=data.output?.flatMap((x:any)=>x.content??[]).find((x:any)=>x.type==='output_text')?.text;if(!output)throw new Error('Respuesta vacía')
+  const advice=JSON.parse(output);await prisma.activity.create({data:{leadId,userId:user.id,type:'AI_INSIGHT',description:`Coach IA: ${advice.nextStep}`,metadata:{kind:'acquisition_coach',advice}}});return NextResponse.json({data:advice})
+}catch(e){if(e instanceof z.ZodError)return NextResponse.json({error:'Datos inválidos'},{status:400});console.error(e);return NextResponse.json({error:e instanceof Error?e.message:'Error interno'},{status:500})}}
