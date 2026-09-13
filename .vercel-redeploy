@@ -1,2 +1,2 @@
-Production redeploy requested: 2026-09-13T00:40:00Z
-Includes Acquisition OS and OpenAI acquisition coach.
+Redeploy requested: 2026-09-13T00:00:00Z
+Reason: activate OpenAI Acquisition OS environment variables
