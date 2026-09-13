@@ -135,6 +135,13 @@ button { cursor: pointer; }
 .future-board { padding:16px;border:1px solid rgba(255,255,255,.05);border-radius:22px;background:rgba(0,0,0,.12); }
 .future-lead { position:relative;overflow:hidden;border-radius:16px!important;background:linear-gradient(145deg,rgba(35,35,39,.9),rgba(21,21,24,.9))!important;border-color:rgba(255,255,255,.075)!important;box-shadow:inset 0 1px rgba(255,255,255,.035),0 10px 28px rgba(0,0,0,.13); }
 .future-lead:hover { transform:translateY(-3px)!important;border-color:rgba(34,211,238,.18)!important;box-shadow:inset 0 1px rgba(255,255,255,.05),0 16px 36px rgba(0,0,0,.22),0 0 30px rgba(34,211,238,.025); }
+.pipeline-shell { border:1px solid rgba(255,255,255,.055);border-radius:26px;background:linear-gradient(145deg,rgba(19,19,22,.78),rgba(9,9,11,.7));box-shadow:inset 0 1px rgba(255,255,255,.025);scrollbar-color:rgba(255,255,255,.14) transparent; }
+.pipeline-shell::before { content:'';position:sticky;left:0;display:block;height:1px;width:100%;background:linear-gradient(90deg,rgba(34,211,238,.25),rgba(139,92,246,.18),rgba(255,122,26,.15),transparent); }
+.module-intro { position:relative;display:flex;min-height:142px;align-items:flex-end;justify-content:space-between;overflow:hidden;border:1px solid rgba(255,255,255,.07);border-radius:26px;padding:26px 28px;background:linear-gradient(125deg,rgba(37,37,42,.82),rgba(18,18,21,.88));box-shadow:inset 0 1px rgba(255,255,255,.045),0 24px 70px rgba(0,0,0,.18); }
+.module-intro::after { content:'';position:absolute;right:-60px;top:-90px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(34,211,238,.1),rgba(139,92,246,.045) 45%,transparent 70%);pointer-events:none; }
+.module-intro h1 { position:relative;margin-top:12px;font-size:30px;font-weight:600;line-height:1;letter-spacing:-.055em;color:#fff; }.module-intro p{position:relative;margin-top:10px;font-size:10.5px;color:#52525b}.module-orb{position:relative;z-index:1;margin-right:20px;margin-bottom:8px;font-size:38px;color:rgba(255,255,255,.16);filter:drop-shadow(0 0 22px rgba(34,211,238,.2));animation:module-float 4s ease-in-out infinite}.module-intro .future-status{padding:5px 9px}
+@keyframes module-float{50%{transform:translateY(-7px) rotate(3deg);color:rgba(103,232,249,.3)}}
+@media(max-width:640px){.module-intro{min-height:125px;padding:22px}.module-intro h1{font-size:25px}.module-orb{font-size:30px;margin-right:0}}
 
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
