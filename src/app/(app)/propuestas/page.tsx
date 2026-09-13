@@ -42,6 +42,7 @@ export default function PropuestasPage() {
         primaryAction={{ label: 'Nueva propuesta', onClick: () => setModalOpen(true) }}
       />
       <div className="future-canvas flex-1 overflow-y-auto p-4 md:p-7 space-y-5">
+        <div className="module-intro"><div><div className="future-status"><span />Proposal intelligence</div><h1>Centro de propuestas</h1><p>Controlá valor, aceptación y decisiones comerciales en tiempo real.</p></div><i className="ti ti-file-invoice module-orb" /></div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
             { label: 'Valor total', value: formatCurrency(totalValue) },
