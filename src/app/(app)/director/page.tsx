@@ -33,10 +33,10 @@ export default function DirectorPage() {
   return (
     <>
       <Topbar title="Director Comercial IA" subtitle="Tu socio estratégico de ventas" />
-      <div className="flex-1 overflow-hidden flex flex-col lg:flex-row gap-4 p-3 md:p-5 overflow-y-auto lg:overflow-y-hidden">
+      <div className="future-canvas flex-1 overflow-hidden flex flex-col lg:flex-row gap-5 p-4 md:p-7 overflow-y-auto lg:overflow-y-hidden">
         {/* Left: metrics + insights */}
         <div className="w-full lg:w-[280px] lg:shrink-0 space-y-3 lg:overflow-y-auto shrink-0">
-          <div className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[10px] p-4">
+          <div className="future-panel p-4">
             <div className="text-[10.5px] text-[var(--text-3)] mb-1">Proyección de pipeline</div>
             <div className="text-[26px] font-bold text-[var(--green)] font-mono">
               {metricsLoading ? '...' : formatCurrency(m?.weightedPipelineValue ?? 0)}
@@ -44,9 +44,10 @@ export default function DirectorPage() {
             <div className="text-[11px] text-[var(--text-3)] mt-1">Valor ponderado por probabilidad de cierre</div>
           </div>
 
-          <div className="bg-[rgba(245,158,11,0.06)] border border-[rgba(245,158,11,0.18)] rounded-[10px] p-4 space-y-3">
+          <div className="future-panel relative overflow-hidden p-5 space-y-3">
+            <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-violet-500/10 blur-3xl" />
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-[7px] bg-[rgba(245,158,11,0.15)] flex items-center justify-center text-[var(--amber)]">
+              <div className="w-7 h-7 rounded-[14px] bg-[rgba(245,158,11,0.15)] flex items-center justify-center text-[var(--amber)]">
                 <i className="ti ti-robot text-[14px]" aria-hidden="true" />
               </div>
               <div className="text-[12.5px] font-semibold text-[var(--text)]">Análisis del Director</div>
@@ -65,7 +66,7 @@ export default function DirectorPage() {
             })}
           </div>
 
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] p-4">
+          <div className="future-panel p-4">
             <div className="text-[12px] font-semibold text-[var(--text)] mb-3">Leads con mayor probabilidad</div>
             <div className="space-y-2">
               {!metricsLoading && (m?.topLeads ?? []).length === 0 && (
@@ -87,7 +88,7 @@ export default function DirectorPage() {
         </div>
 
         {/* Right: chat */}
-        <div className="flex-1 flex flex-col bg-[var(--surface)] border border-[var(--border)] rounded-[10px] overflow-hidden min-h-[480px] lg:min-h-0">
+        <div className="flex-1 flex flex-col future-panel overflow-hidden min-h-[480px] lg:min-h-0 shadow-[0_25px_100px_rgba(139,92,246,.06)]">
           <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-[var(--green)] animate-pulse" />
             <span className="text-[12.5px] font-medium text-[var(--text)]">Director Comercial IA</span>
@@ -96,10 +97,10 @@ export default function DirectorPage() {
 
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.map((msg, i) => (
-              <div key={i} className={`p-3 rounded-[8px] text-[12.5px] leading-[1.6] ${
+              <div key={i} className={`p-3 rounded-[16px] text-[12.5px] leading-[1.6] ${
                 msg.role === 'assistant'
-                  ? 'bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text-2)] border-l-2 border-l-[var(--amber)]'
-                  : 'bg-[rgba(249,115,22,0.1)] border border-[rgba(249,115,22,0.2)] text-[var(--text)] text-right ml-8'
+                  ? 'bg-white/[.035] border border-white/[.065] text-[var(--text-2)]'
+                  : 'bg-gradient-to-br from-violet-500/15 to-cyan-400/[.06] border border-violet-300/10 text-[var(--text)] text-right ml-8'
               }`}>
                 {msg.content}
               </div>
@@ -116,7 +117,7 @@ export default function DirectorPage() {
 
           <div className="p-3 border-t border-[var(--border)] flex gap-2">
             <input
-              className="flex-1 bg-[var(--surface-2)] border border-[var(--border)] rounded-[7px] px-3 py-2 text-[12.5px] text-[var(--text)] placeholder-[var(--text-3)] outline-none focus:border-[var(--accent)] transition-colors"
+              className="flex-1 bg-[var(--surface-2)] border border-[var(--border)] rounded-[14px] px-3 py-2 text-[12.5px] text-[var(--text)] placeholder-[var(--text-3)] outline-none focus:border-[var(--accent)] transition-colors"
               placeholder="¿Cómo llego a $8.000 este mes?"
               value={input}
               onChange={e => setInput(e.target.value)}
@@ -125,7 +126,7 @@ export default function DirectorPage() {
             <button
               onClick={handleSend}
               disabled={isStreaming || !input.trim()}
-              className="px-3 py-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 text-white rounded-[7px] transition-all"
+              className="grid h-10 w-10 place-items-center bg-gradient-to-br from-violet-500 to-indigo-600 hover:scale-105 disabled:opacity-50 text-white rounded-full transition-all shadow-lg shadow-violet-900/20"
               aria-label="Enviar mensaje"
             >
               <i className="ti ti-send text-[14px]" aria-hidden="true" />
