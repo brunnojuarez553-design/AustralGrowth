@@ -36,6 +36,7 @@ export default function ProspeccionPage() {
         primaryAction={{ label: showForm ? 'Cancelar' : 'Nuevo lead', onClick: () => setShowForm(v => !v) }}
       />
       <div className="future-canvas flex-1 overflow-y-auto p-4 md:p-7 space-y-5">
+        <div className="module-intro"><div><div className="future-status"><span />Prospecting radar</div><h1>Nuevas oportunidades</h1><p>Detectá, calificá y convertí prospectos antes que tu competencia.</p></div><i className="ti ti-radar-2 module-orb" /></div>
         {showForm && (
           <form onSubmit={handleSubmit} className="future-panel p-5 md:p-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input required placeholder="Empresa *" value={form.companyName}
