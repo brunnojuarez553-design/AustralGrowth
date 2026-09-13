@@ -41,12 +41,13 @@ export default function IAPage() {
   return (
     <>
       <Topbar title="IA Comercial" subtitle="Insights en tiempo real · Generador de mensajes" />
-      <div className="flex-1 overflow-y-auto p-5 space-y-4">
+      <div className="future-canvas flex-1 overflow-y-auto p-4 md:p-7 space-y-5">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="space-y-3">
-            <div className="bg-[rgba(245,158,11,0.06)] border border-[rgba(245,158,11,0.18)] rounded-[10px] p-4">
+            <div className="future-panel relative overflow-hidden p-5">
+              <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-cyan-400/[.07] blur-3xl" />
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 rounded-[7px] bg-[rgba(245,158,11,0.15)] flex items-center justify-center text-[var(--amber)] text-[14px]"><i className="ti ti-brain" aria-hidden="true" /></div>
+                <div className="w-7 h-7 rounded-[14px] bg-[rgba(245,158,11,0.15)] flex items-center justify-center text-[var(--amber)] text-[14px]"><i className="ti ti-brain" aria-hidden="true" /></div>
                 <div><div className="text-[12.5px] font-semibold text-[var(--text)]">Insights de hoy</div><div className="text-[10.5px] text-[var(--text-3)]">Basado en tu CRM completo</div></div>
               </div>
               {isLoading && <div className="text-[12px] text-[var(--text-3)] py-2">Calculando...</div>}
@@ -60,12 +61,12 @@ export default function IAPage() {
                 )
               })}
             </div>
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] p-4">
+            <div className="future-panel p-4">
               <div className="text-[13px] font-semibold text-[var(--text)] mb-3">Generador de mensajes</div>
               <select
                 value={selectedLeadId}
                 onChange={e => setSelectedLeadId(e.target.value)}
-                className="w-full bg-[var(--surface-2)] border border-[var(--border-2)] rounded-[7px] px-3 py-2 text-[12.5px] text-[var(--text)] outline-none focus:border-[var(--accent)] mb-3"
+                className="w-full bg-[var(--surface-2)] border border-[var(--border-2)] rounded-[14px] px-3 py-2 text-[12.5px] text-[var(--text)] outline-none focus:border-[var(--accent)] mb-3"
               >
                 <option value="">Elegí un lead...</option>
                 {(leads ?? []).map(l => <option key={l.id} value={l.id}>{l.companyName}</option>)}
@@ -73,7 +74,7 @@ export default function IAPage() {
               <div className="flex gap-2 mb-3 flex-wrap">
                 {([['whatsapp','ti-brand-whatsapp','WhatsApp'],['email','ti-mail','Email'],['call_script','ti-phone','Script llamada']] as const).map(([k,icon,label]) => (
                   <button key={k} onClick={() => handleGenerate(k)} disabled={!selectedLeadId || isGenerating}
-                    className={`flex items-center gap-[6px] px-3 py-[5px] rounded-[7px] text-[11.5px] font-medium border transition-all disabled:opacity-40 disabled:cursor-not-allowed ${channel === k ? 'bg-[rgba(249,115,22,0.15)] text-[#FDBA74] border-[rgba(249,115,22,0.3)]' : 'text-[var(--text-2)] border-[var(--border-2)] hover:bg-[var(--surface-3)]'}`}>
+                    className={`flex items-center gap-[6px] px-3 py-[5px] rounded-[14px] text-[11.5px] font-medium border transition-all disabled:opacity-40 disabled:cursor-not-allowed ${channel === k ? 'bg-[rgba(249,115,22,0.15)] text-[#FDBA74] border-[rgba(249,115,22,0.3)]' : 'text-[var(--text-2)] border-[var(--border-2)] hover:bg-[var(--surface-3)]'}`}>
                     <i className={`ti ${icon} text-[13px]`} aria-hidden="true" />{label}
                   </button>
                 ))}
@@ -85,19 +86,19 @@ export default function IAPage() {
                 <div className="text-[12px] text-[var(--text-3)] py-2">Generando con IA...</div>
               )}
               {error && (
-                <div className="text-[12px] rounded-[7px] px-3 py-2" style={{ background: 'rgba(239,68,68,0.1)', color: '#FCA5A5', border: '1px solid rgba(239,68,68,0.2)' }}>
+                <div className="text-[12px] rounded-[14px] px-3 py-2" style={{ background: 'rgba(239,68,68,0.1)', color: '#FCA5A5', border: '1px solid rgba(239,68,68,0.2)' }}>
                   {error}
                 </div>
               )}
               {generatedMessage && !isGenerating && (
-                <div className="bg-[var(--surface-2)] border border-[var(--border)] border-l-2 border-l-[var(--amber)] rounded-[7px] p-3 text-[12px] text-[var(--text-2)] leading-[1.6] whitespace-pre-wrap">
+                <div className="rounded-[18px] border border-cyan-300/10 bg-gradient-to-br from-cyan-400/[.06] to-violet-500/[.05] p-4 text-[12px] text-[var(--text-2)] leading-[1.6] whitespace-pre-wrap shadow-[0_15px_50px_rgba(0,0,0,.18)]">
                   {generatedMessage}
                 </div>
               )}
             </div>
           </div>
 
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] p-4">
+          <div className="future-panel p-4">
             <div className="text-[13px] font-semibold text-[var(--text)] mb-4">Probabilidad de cierre</div>
             <div className="space-y-1">
               {isLoading && <div className="text-[12px] text-[var(--text-3)] py-2">Cargando...</div>}
@@ -107,7 +108,7 @@ export default function IAPage() {
               {(m?.topLeads ?? []).map(lead => {
                 const color = PROB_COLOR(lead.probability)
                 return (
-                  <div key={lead.companyName} className="flex items-center gap-3 px-2 py-2 rounded-[7px] hover:bg-[var(--surface-3)] transition-all">
+                  <div key={lead.companyName} className="flex items-center gap-3 px-2 py-2 rounded-[14px] hover:bg-[var(--surface-3)] transition-all">
                     <div className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-[11px] font-semibold text-white shrink-0" style={{ background: color }}>{initials(lead.companyName)}</div>
                     <div className="flex-1 min-w-0">
                       <div className="text-[12.5px] font-medium text-[var(--text)] mb-[4px] truncate">{lead.companyName}</div>
