@@ -52,6 +52,7 @@ export default function ProyectosPage() {
         primaryAction={{ label: 'Nuevo proyecto', onClick: () => setModalOpen(true) }}
       />
       <div className="future-canvas flex-1 overflow-hidden flex flex-col p-4 md:p-7 gap-5">
+        <div className="module-intro shrink-0"><div><div className="future-status"><span />Delivery system</div><h1>Operación de proyectos</h1><p>Una visión completa del avance, los tiempos y las próximas entregas.</p></div><i className="ti ti-stack-2 module-orb" /></div>
         {isLoading && (
           <div className="flex-1 flex items-center justify-center text-[13px] text-[var(--text-3)]">
             Cargando proyectos...
