@@ -41,7 +41,7 @@ export default function PropuestasPage() {
         subtitle={`${proposals.length} propuestas · ${formatCurrency(totalValue)} en total`}
         primaryAction={{ label: 'Nueva propuesta', onClick: () => setModalOpen(true) }}
       />
-      <div className="flex-1 overflow-y-auto p-5 space-y-4">
+      <div className="future-canvas flex-1 overflow-y-auto p-4 md:p-7 space-y-5">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
             { label: 'Valor total', value: formatCurrency(totalValue) },
@@ -49,14 +49,14 @@ export default function PropuestasPage() {
             { label: 'Aceptadas', value: String(accepted.length) },
             { label: 'Tasa de aceptación', value: `${acceptRate}%` },
           ].map((s, i) => (
-            <div key={i} className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[10px] p-4">
+            <div key={i} className="future-panel future-kpi">
               <div className="text-[11px] text-[var(--text-3)] mb-[6px]">{s.label}</div>
-              <div className="text-[20px] font-bold font-mono tracking-tight text-[var(--text)]">{s.value}</div>
+              <div className="mt-3 text-[24px] font-semibold font-mono tracking-[-.05em] text-[var(--text)]">{s.value}</div>
             </div>
           ))}
         </div>
 
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[10px] overflow-x-auto">
+        <div className="future-panel overflow-x-auto">
           <div className="min-w-[620px]">
           <div className="grid grid-cols-[1fr_140px_110px_110px_110px] gap-3 px-4 py-2.5 border-b border-[var(--border)] text-[10.5px] font-semibold uppercase tracking-wide text-[var(--text-3)]">
             <span>Cliente / Propuesta</span>
@@ -81,7 +81,7 @@ export default function PropuestasPage() {
             return (
               <div
                 key={p.id}
-                className="grid grid-cols-[1fr_140px_110px_110px_110px] gap-3 px-4 py-3 border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface-3)] transition-all"
+                className="grid grid-cols-[1fr_140px_110px_110px_110px] gap-3 px-5 py-4 border-b border-[var(--border)] last:border-0 hover:bg-violet-300/[.025] transition-all"
               >
                 <div>
                   <div className="text-[12.5px] font-medium text-[var(--text)]">{p.lead?.companyName ?? '—'}</div>
