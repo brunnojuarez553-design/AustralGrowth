@@ -42,6 +42,7 @@ export default function IAPage() {
     <>
       <Topbar title="IA Comercial" subtitle="Insights en tiempo real · Generador de mensajes" />
       <div className="future-canvas flex-1 overflow-y-auto p-4 md:p-7 space-y-5">
+        <div className="module-intro"><div><div className="future-status"><span />AI signal online</div><h1>Inteligencia comercial</h1><p>Generá mensajes y detectá oportunidades con el contexto real de tu pipeline.</p></div><i className="ti ti-sparkles module-orb" /></div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="space-y-3">
             <div className="future-panel relative overflow-hidden p-5">
