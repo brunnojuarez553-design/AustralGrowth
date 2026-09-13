@@ -31,7 +31,7 @@ function LeadCard({ lead, onOpen, onDragStart }: {
       draggable
       onDragStart={e => onDragStart(e, lead)}
       onClick={onOpen}
-      className={`bg-[var(--surface-2)] border rounded-[7px] p-[10px] mb-[7px] cursor-pointer transition-all hover:bg-[var(--surface-3)] hover:-translate-y-[1px] active:cursor-grabbing ${
+      className={`future-lead border p-3 mb-2 cursor-pointer transition-all active:cursor-grabbing ${
         lead.isHot ? 'border-[rgba(249,115,22,0.35)] shadow-[0_0_12px_rgba(249,115,22,0.12)]' : 'border-[var(--border)]'
       }`}
     >
@@ -65,7 +65,7 @@ function PipelineCol({ column, onOpenLead, onDragStart, onDrop }: {
 
   return (
     <div
-      className="min-w-[168px] w-[168px] shrink-0 rounded-[8px] transition-colors"
+      className="future-board min-w-[210px] w-[210px] shrink-0 transition-colors"
       style={{ background: isOver ? 'rgba(249,115,22,0.06)' : 'transparent' }}
       onDragOver={e => { e.preventDefault(); setIsOver(true) }}
       onDragLeave={() => setIsOver(false)}
@@ -80,7 +80,7 @@ function PipelineCol({ column, onOpenLead, onDragStart, onDrop }: {
           <LeadCard key={lead.id} lead={lead} onOpen={() => onOpenLead(lead)} onDragStart={onDragStart} />
         ))}
         {column.leads.length === 0 && (
-          <div className="border-2 border-dashed border-[var(--border)] rounded-[7px] h-[80px] flex items-center justify-center">
+          <div className="border-2 border-dashed border-[var(--border)] rounded-[14px] h-[80px] flex items-center justify-center">
             <span className="text-[11px] text-[var(--text-3)]">Sin leads</span>
           </div>
         )}
@@ -135,7 +135,7 @@ export default function CRMPage() {
   return (
     <>
       <Topbar title="CRM Pipeline" subtitle={`${summary.totalLeads ?? 0} leads activos · Arrastrá para cambiar de etapa`} primaryAction={{ label: 'Nuevo lead', onClick: openCreate }} />
-      <div className="flex-1 overflow-hidden flex flex-col p-5 gap-4">
+      <div className="future-canvas flex-1 overflow-hidden flex flex-col p-4 md:p-7 gap-5">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
           {[
             { label: 'Valor en pipeline', value: formatCurrency(summary.totalPipelineValue ?? 0) },
@@ -143,9 +143,9 @@ export default function CRMPage() {
             { label: 'Ticket promedio', value: formatCurrency(summary.avgTicket ?? 0) },
             { label: 'Total de leads', value: String(summary.totalLeads ?? 0) },
           ].map((s, i) => (
-            <div key={i} className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[8px] p-3">
+            <div key={i} className="future-panel future-kpi">
               <div className="text-[10.5px] text-[var(--text-3)] mb-1">{s.label}</div>
-              <div className="text-[16px] font-bold text-[var(--text)] font-mono">{s.value}</div>
+              <div className="mt-3 text-[24px] font-semibold tracking-[-.05em] text-[var(--text)] font-mono">{s.value}</div>
             </div>
           ))}
         </div>
