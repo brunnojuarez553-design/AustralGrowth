@@ -14,6 +14,7 @@ const navItems = [
     { href: '/ia', label: 'IA Comercial', icon: 'ti-brain', aiBadge: true },
   ]},
   { group: 'Ventas', items: [
+    { href: '/adquisicion', label: 'Acquisition OS', icon: 'ti-route', aiBadge: true },
     { href: '/prospeccion', label: 'Prospección', icon: 'ti-radar' },
     { href: '/propuestas', label: 'Propuestas', icon: 'ti-file-description' },
   ]},
