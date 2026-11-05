@@ -20,7 +20,7 @@ Editar, mover, completar o eliminar una actividad recurrente afecta toda la seri
 
 ## Activación
 
-1. Confirmar que la base conectada a las variables `DATABASE_URL` y `DIRECT_URL` de este repositorio es la base de AustralGrowth. La consulta al proyecto Supabase encontrado por nombre no pudo ejecutarse: el control automático solicitó autorización explícita del propietario.
+1. Confirmar que la base conectada a las variables `DATABASE_URL` y `DIRECT_URL` de este repositorio es la base de AustralGrowth. En el proyecto `austral-growth-os`, la activación fue autorizada y completada el 5 de noviembre de 2026.
 2. Revisar y ejecutar **una sola vez** `prisma/calendar-setup.sql` en esa base, antes de desplegar la rama. Es SQL aditivo: crea únicamente `CalendarEvent`, sus índices y claves foráneas, sin modificar ni borrar tablas existentes.
 3. La tabla usa RLS y revoca acceso directo a `anon`/`authenticated`/`PUBLIC`. Prisma debe conectarse con el rol servidor existente que pueda acceder a sus registros (por ejemplo `postgres`); no exponer esa conexión al navegador. No se crean políticas de acceso desde la API REST pública.
 4. Desplegar la rama con las variables existentes. El script de build ejecuta `prisma generate` para generar el nuevo cliente. No usar `db:seed` ni resetear la base existente.
@@ -39,4 +39,4 @@ TZ=America/New_York node --import tsx --test tests/calendar.test.ts
 npm run build
 ```
 
-El build necesita las variables públicas Supabase existentes; se usaron valores ficticios únicamente para compilar en el entorno de desarrollo sin credenciales. No se probó una sesión real ni persistencia contra producción porque la consulta a la base quedó bloqueada pendiente de autorización.
+El build necesita las variables públicas Supabase existentes; se usaron valores ficticios únicamente para compilar en el entorno de desarrollo sin credenciales. Se verificó creación, lectura, actualización y eliminación contra la base de producción dentro de una transacción revertida, sin dejar datos de prueba. Se confirmó RLS activo y ausencia de permiso SELECT directo para anon/authenticated. No se probó una sesión real del navegador.
