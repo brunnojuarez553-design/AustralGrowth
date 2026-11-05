@@ -19,6 +19,7 @@ const navItems = [
     { href: '/propuestas', label: 'Propuestas', icon: 'ti-file-description' },
   ]},
   { group: 'Operaciones', items: [
+    { href: '/calendario', label: 'Calendario', icon: 'ti-calendar' },
     { href: '/proyectos', label: 'Proyectos', icon: 'ti-checklist' },
     { href: '/finanzas', label: 'Finanzas', icon: 'ti-chart-pie-2' },
     { href: '/director', label: 'Director IA', icon: 'ti-robot', aiBadge: true },

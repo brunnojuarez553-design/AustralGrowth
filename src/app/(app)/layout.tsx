@@ -1,3 +1,4 @@
+import { CalendarReminders } from '@/components/calendar/CalendarReminders'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { SidebarProvider } from '@/components/layout/SidebarContext'
 import { CommandPalette } from '@/components/layout/CommandPalette'
@@ -12,6 +13,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </main>
       </div>
       <CommandPalette />
+      <CalendarReminders />
     </SidebarProvider>
   )
 }
