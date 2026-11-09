@@ -31,6 +31,26 @@ const navItems = [
   ]},
 ]
 
+const workspaceTabs = ['/dashboard', '/crm', '/calendario', '/finanzas', '/metricas', '/proyectos']
+const workspaceLabels = ['Resumen', 'Pipeline', 'Agenda', 'Finanzas', 'Métricas', 'Proyectos']
+
+export function WorkspaceTabs() {
+  const pathname = usePathname()
+  return (
+    <nav className="workspace-tabs" aria-label="Secciones principales">
+      {workspaceTabs.map((href, index) => {
+        const active = pathname === href || pathname.startsWith(href + '/')
+        return (
+          <Link key={href} href={href} aria-current={active ? 'page' : undefined}>
+            {active && <motion.span layoutId="workspace-tab" className="workspace-tab-marker" aria-hidden="true" transition={{ type: 'spring', stiffness: 420, damping: 36 }} />}
+            <span>{workspaceLabels[index]}</span>
+          </Link>
+        )
+      })}
+    </nav>
+  )
+}
+
 export function Sidebar() {
   const pathname = usePathname()
   const { isOpen, close } = useSidebar()
@@ -55,7 +75,7 @@ export function Sidebar() {
         )}
       >
         {/* Logo */}
-        <div className="px-5 py-[20px] flex items-center gap-3">
+        <div className="workspace-brand px-5 py-[20px] flex items-center gap-3">
           <div className="relative w-9 h-9 flex items-center justify-center shrink-0 rounded-xl bg-white/[.04] border border-white/[.07] p-1.5">
             <Image
               src="https://res.cloudinary.com/dgp7uhps3/image/upload/v1784260223/logo_austral_web_studio_wcitrd.png"
@@ -80,7 +100,7 @@ export function Sidebar() {
         </div>
 
         {/* Studio card */}
-        <div className="px-3 pt-1 pb-2">
+        <div className="workspace-studio px-3 pt-1 pb-2">
           <div className="relative rounded-[18px] p-3.5 overflow-hidden border border-white/[.065]" style={{ background: 'linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.025))', boxShadow: 'inset 0 1px rgba(255,255,255,.04)' }}>
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-[12px] bg-[var(--accent)] flex items-center justify-center text-[var(--on-accent)] text-[15px] font-semibold shrink-0">
@@ -101,7 +121,7 @@ export function Sidebar() {
         <nav aria-label="Navegación principal" className="flex-1 overflow-y-auto p-2 space-y-1">
           {navItems.map(group => (
             <div key={group.group}>
-              <div className="text-[10px] font-semibold text-[var(--text-3)] tracking-wide px-2 py-2 mt-2">
+              <div className="workspace-group text-[10px] font-semibold text-[var(--text-3)] tracking-wide px-2 py-2 mt-2">
                 {group.group}
               </div>
               {group.items.map(item => {
@@ -109,7 +129,7 @@ export function Sidebar() {
                 return (
                   <Link
                     key={item.href}
-                    href={item.href} aria-current={isActive ? 'page' : undefined}
+                    href={item.href} title={item.label} aria-label={item.label} aria-current={isActive ? 'page' : undefined}
                     onClick={close}
                     className={cn(
                       'relative flex items-center gap-[10px] px-3 py-[10px] rounded-[12px] text-[13px] md:text-[12px] font-normal transition-all duration-200 mb-[2px]',
@@ -120,9 +140,9 @@ export function Sidebar() {
                   >
                     {isActive && <motion.span layoutId="growth-nav-indicator" className="growth-nav-indicator" aria-hidden="true" transition={{ type: 'spring', stiffness: 390, damping: 34 }} />}
                     <i className={`ti ${item.icon} text-[15px] w-4 text-center`} aria-hidden="true" />
-                    <span>{item.label}</span>
+                    <span className="workspace-link-label">{item.label}</span>
                     {item.aiBadge && (
-                      <span className="ml-auto text-[9px] bg-[rgba(245,158,11,0.15)] text-[var(--amber)] rounded-full px-[5px] py-[1px] font-semibold border border-[rgba(245,158,11,0.2)]">
+                      <span className="workspace-link-label ml-auto text-[9px] bg-[rgba(245,158,11,0.15)] text-[var(--amber)] rounded-full px-[5px] py-[1px] font-semibold border border-[rgba(245,158,11,0.2)]">
                         IA
                       </span>
                     )}
@@ -134,7 +154,7 @@ export function Sidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="p-2 border-t border-[var(--border)]">
+        <div className="workspace-profile p-2 border-t border-[var(--border)]">
           <div className="flex items-center gap-2 px-2 py-[7px] rounded-[7px] cursor-pointer hover:bg-[var(--surface-3)]">
             <div className="w-7 h-7 rounded-full bg-[var(--surface-3)] flex items-center justify-center text-[11px] font-semibold text-[var(--accent)] shrink-0">
               BM

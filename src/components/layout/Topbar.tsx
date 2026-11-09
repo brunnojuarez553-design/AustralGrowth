@@ -2,6 +2,7 @@
 
 import { useSidebar } from './SidebarContext'
 import { Menu } from 'lucide-react'
+import { WorkspaceTabs } from './Sidebar'
 
 interface TopbarProps {
   title: string
@@ -29,20 +30,10 @@ export function Topbar({ title, subtitle, primaryAction }: TopbarProps) {
         <p className="text-[10px] md:text-[11px] text-[var(--text-3)] truncate hidden sm:block">{subtitle}</p>
       </div>
 
-      <div className="min-w-0 flex-1 hidden md:flex justify-center px-3">
-        <button
-          onClick={openSearch}
-          className="w-full max-w-[410px] flex items-center gap-2.5 px-4 py-[10px] rounded-[13px] text-[12px] text-[var(--text-3)] bg-white/[.055] border border-white/[.075] hover:bg-white/[.08] transition-all duration-300"
-        >
-          <i className="ti ti-search text-[14px]" aria-hidden="true" />
-          <span className="min-w-0 flex-1 truncate text-left">Buscar leads, movimientos, proyectos...</span>
-          <kbd className="text-[10px] px-1.5 py-[1px] rounded-[5px] border border-[var(--border-2)] text-[var(--text-3)] font-mono">⌘K</kbd>
-        </button>
-      </div>
+      <WorkspaceTabs />
+      <div className="flex-1 lg:hidden" />
 
-      <div className="flex-1 md:hidden" />
-
-      <button onClick={openSearch} className="md:hidden p-[8px] rounded-[7px] text-[var(--text-2)] border border-[var(--border-2)] hover:bg-[var(--surface-3)] transition-all shrink-0" aria-label="Buscar">
+      <button onClick={openSearch} className="p-[8px] rounded-[7px] text-[var(--text-2)] border border-[var(--border-2)] hover:bg-[var(--surface-3)] transition-all shrink-0" aria-label="Buscar">
         <i className="ti ti-search text-[14px]" aria-hidden="true" />
       </button>
       <button className="p-[8px] md:px-[10px] md:py-[6px] rounded-[7px] text-[12.5px] font-medium text-[var(--text-2)] border border-[var(--border-2)] hover:bg-[var(--surface-3)] hover:text-[var(--text)] transition-all shrink-0" aria-label="Notificaciones">
