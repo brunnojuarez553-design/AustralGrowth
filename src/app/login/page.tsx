@@ -39,7 +39,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg)' }}>
+    <div className="min-h-[100dvh] flex items-center justify-center p-4 growth-login">
       <div className="w-full max-w-[380px]">
         <div className="flex flex-col items-center mb-8">
           <div className="relative w-14 h-14 mb-4">
@@ -59,7 +59,7 @@ export default function LoginPage() {
 
         <form
           onSubmit={handleSubmit}
-          className="rounded-[12px] p-6 space-y-4"
+          className="austral-panel rounded-[18px] p-6 space-y-4"
           style={{ background: 'var(--surface)', border: '1px solid var(--border-2)' }}
         >
           {error && (
@@ -69,9 +69,9 @@ export default function LoginPage() {
           )}
 
           <div className="space-y-1.5">
-            <label className="text-[11px] font-medium" style={{ color: 'var(--text-3)' }}>Email</label>
+            <label htmlFor="login-email" className="text-[11px] font-medium" style={{ color: 'var(--text-3)' }}>Email</label>
             <input
-              type="email"
+              id="login-email" type="email" autoComplete="username"
               required
               autoFocus
               value={email}
@@ -83,9 +83,9 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[11px] font-medium" style={{ color: 'var(--text-3)' }}>Contraseña</label>
+            <label htmlFor="login-password" className="text-[11px] font-medium" style={{ color: 'var(--text-3)' }}>Contraseña</label>
             <input
-              type="password"
+              id="login-password" type="password" autoComplete="current-password"
               required
               value={password}
               onChange={e => setPassword(e.target.value)}
@@ -98,7 +98,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-[7px] text-[13px] font-semibold text-white transition-all disabled:opacity-50"
+            className="w-full py-2.5 rounded-[7px] text-[13px] font-semibold text-[var(--on-accent)] transition-all disabled:opacity-50"
             style={{ background: 'var(--accent)' }}
           >
             {loading ? 'Ingresando...' : 'Ingresar'}

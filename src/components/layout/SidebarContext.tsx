@@ -31,7 +31,10 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
         e.preventDefault()
         setSearchOpen(v => !v)
       }
-      if (e.key === 'Escape') setSearchOpen(false)
+      if (e.key === 'Escape') {
+        setSearchOpen(false)
+        setIsOpen(false)
+      }
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)

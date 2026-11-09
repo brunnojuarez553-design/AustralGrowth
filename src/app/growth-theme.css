@@ -1,0 +1,137 @@
+:root {
+  color-scheme: dark;
+  --bg: #111413;
+  --surface: #202422;
+  --surface-2: #20251f;
+  --surface-3: #2a3028;
+  --border: #30372e;
+  --border-2: #3e483b;
+  --accent: #c8fa72;
+  --accent-hover: #dbff9e;
+  --accent-glow: rgb(200 250 114 / .18);
+  --text: #f3f6ef;
+  --text-2: #b4c0ae;
+  --text-3: #9da997;
+  --on-accent: #172011;
+  --chart-revenue: #efa887;
+}
+
+.growth-shell {
+  background: var(--bg);
+  height: 100dvh;
+}
+.growth-sidebar {
+  height: 100dvh;
+  background: #171a16;
+  border-color: var(--border);
+}
+.growth-sidebar [aria-current="page"] {
+  background: #293621;
+  color: var(--accent);
+  border-color: #3e5330;
+}
+.growth-topbar {
+  background: rgb(23 26 22 / .9);
+  border-color: var(--border);
+  backdrop-filter: blur(16px);
+}
+.growth-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.growth-primary:hover { background: var(--accent-hover); }
+
+.future-canvas, .dashboard-scroll {
+  background: radial-gradient(ellipse at 68% 0%, #29343c 0%, transparent 42rem), var(--bg);
+}
+.apple-card, .future-panel, .austral-panel, .module-intro, .pipeline-shell {
+  border: 1px solid var(--border);
+  background: linear-gradient(150deg, rgb(39 44 42 / .91), rgb(24 27 25 / .95));
+  box-shadow: inset 0 1px rgb(255 255 255 / .035);
+  border-radius: 18px;
+  backdrop-filter: none;
+}
+.apple-card:hover, .future-panel:hover {
+  transform: none;
+  box-shadow: inset 0 1px rgb(255 255 255 / .035);
+}
+.apple-hero {
+  border: 1px solid #3c5130;
+  border-radius: 22px;
+  background: radial-gradient(ellipse at top right, #354829, transparent 70%), #1c2618;
+  box-shadow: none;
+}
+.apple-orb {
+  inset: 0;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  filter: none;
+  background: repeating-linear-gradient(125deg, transparent 0 22px, rgb(200 250 114 / .09) 23px 24px);
+  mask-image: linear-gradient(110deg, transparent 34%, black);
+}
+.apple-gradient-text, .future-gradient { color: var(--accent); background: none; }
+.module-intro { min-height: 116px; }
+.module-intro p, .future-label { color: var(--text-3); }
+.module-orb { color: var(--accent); animation: none; filter: none; }
+.module-intro::after { background: radial-gradient(circle, rgb(200 250 114 / .1), transparent 70%); }
+.future-status { color: var(--accent); background: #293621; border-color: #3e5330; }
+.future-status span { background: currentColor; box-shadow: none; animation: none; }
+.future-lead {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  box-shadow: none;
+}
+.future-lead:hover { transform: none !important; border-color: var(--border-2) !important; box-shadow: none; }
+.future-canvas input:focus, .future-canvas select:focus, .future-canvas textarea:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-glow) !important;
+}
+.future-canvas > *, .apple-reveal, .future-enter, .metric-orbit-card, .core-orbit, .scan-line {
+  animation: none;
+}
+.growth-shell :is(.text-zinc-500, .text-zinc-600, .text-slate-500, .text-slate-600) {
+  color: var(--text-3);
+}
+.growth-shell :is(.font-mono, .recharts-wrapper) {
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+}
+.growth-shell :is(button, a):focus-visible { outline-color: var(--accent); }
+::selection { background: #40592c; color: var(--text); }
+
+@media (max-width: 767px) {
+  .growth-sidebar[aria-hidden="true"] { visibility: hidden; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+.growth-login {
+  background: radial-gradient(ellipse at 50% 18%, #283522 0%, transparent 32rem), var(--bg);
+}
+.growth-login .austral-panel { max-width: 100%; }
+.growth-shell .cal-primary, .growth-shell .cal-today {
+  color: var(--on-accent) !important;
+}
+.growth-shell .cal-primary:hover { background: var(--accent-hover); }
+.growth-shell :is(.cal-month, .cal-time-scroll, .cal-agenda, .cal-time-head) {
+  background: var(--surface);
+}
+.growth-dialog {
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  box-shadow: 0 28px 70px rgb(0 0 0 / .4);
+}
+.growth-dialog-header { background: var(--surface); }
+.growth-nav-indicator {
+  position: absolute;
+  inset-block: 10px;
+  inset-inline-start: 0;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}

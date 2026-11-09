@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -45,17 +46,17 @@ export function Sidebar() {
         />
       )}
 
-      <aside
+      <aside id="growth-sidebar"
         className={cn(
-          'w-[252px] min-w-[252px] bg-[#101012]/88 backdrop-blur-2xl border-r border-white/[.055] flex flex-col h-screen',
+          'growth-sidebar w-[228px] min-w-[228px] border-r border-white/[.055] flex flex-col h-screen',
           'fixed md:sticky top-0 left-0 z-50 md:z-auto transition-transform duration-200',
           'md:translate-x-0',
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+          isOpen ? 'translate-x-0' : 'invisible -translate-x-full md:visible'
         )}
       >
         {/* Logo */}
         <div className="px-5 py-[20px] flex items-center gap-3">
-          <div className="relative w-9 h-9 flex items-center justify-center shrink-0 rounded-xl bg-white/[.04] border border-white/[.07] p-1.5 shadow-[0_0_30px_rgba(255,106,0,.12)]">
+          <div className="relative w-9 h-9 flex items-center justify-center shrink-0 rounded-xl bg-white/[.04] border border-white/[.07] p-1.5">
             <Image
               src="https://res.cloudinary.com/dgp7uhps3/image/upload/v1784260223/logo_austral_web_studio_wcitrd.png"
               alt="Austral Web Studio"
@@ -67,7 +68,7 @@ export function Sidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-[14px] font-semibold text-white tracking-[-.025em] truncate">Austral Growth</div>
-            <div className="text-[9px] text-[#ff9148] tracking-[.16em] uppercase">Business OS</div>
+            <div className="text-[9px] text-[var(--text-3)] tracking-wide">Business OS</div>
           </div>
           <button
             onClick={close}
@@ -82,7 +83,7 @@ export function Sidebar() {
         <div className="px-3 pt-1 pb-2">
           <div className="relative rounded-[18px] p-3.5 overflow-hidden border border-white/[.065]" style={{ background: 'linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.025))', boxShadow: 'inset 0 1px rgba(255,255,255,.04)' }}>
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-[12px] bg-gradient-to-br from-[#ff9a50] to-[#ff6500] shadow-[0_8px_24px_rgba(255,106,0,.18)] flex items-center justify-center text-white text-[15px] font-semibold shrink-0">
+              <div className="w-9 h-9 rounded-[12px] bg-[var(--accent)] flex items-center justify-center text-[var(--on-accent)] text-[15px] font-semibold shrink-0">
                 A
               </div>
               <div className="min-w-0">
@@ -97,10 +98,10 @@ export function Sidebar() {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto p-2 space-y-1">
+        <nav aria-label="Navegación principal" className="flex-1 overflow-y-auto p-2 space-y-1">
           {navItems.map(group => (
             <div key={group.group}>
-              <div className="text-[10px] font-semibold text-[var(--text-3)] tracking-[0.08em] uppercase px-2 py-2 mt-2">
+              <div className="text-[10px] font-semibold text-[var(--text-3)] tracking-wide px-2 py-2 mt-2">
                 {group.group}
               </div>
               {group.items.map(item => {
@@ -108,7 +109,7 @@ export function Sidebar() {
                 return (
                   <Link
                     key={item.href}
-                    href={item.href}
+                    href={item.href} aria-current={isActive ? 'page' : undefined}
                     onClick={close}
                     className={cn(
                       'relative flex items-center gap-[10px] px-3 py-[10px] rounded-[12px] text-[13px] md:text-[12px] font-normal transition-all duration-200 mb-[2px]',
@@ -117,6 +118,7 @@ export function Sidebar() {
                         : 'text-[var(--text-2)] hover:bg-white/[.045] hover:text-white border border-transparent'
                     )}
                   >
+                    {isActive && <motion.span layoutId="growth-nav-indicator" className="growth-nav-indicator" aria-hidden="true" transition={{ type: 'spring', stiffness: 390, damping: 34 }} />}
                     <i className={`ti ${item.icon} text-[15px] w-4 text-center`} aria-hidden="true" />
                     <span>{item.label}</span>
                     {item.aiBadge && (
@@ -134,7 +136,7 @@ export function Sidebar() {
         {/* Footer */}
         <div className="p-2 border-t border-[var(--border)]">
           <div className="flex items-center gap-2 px-2 py-[7px] rounded-[7px] cursor-pointer hover:bg-[var(--surface-3)]">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[var(--accent)] to-[#F59E0B] flex items-center justify-center text-[11px] font-semibold text-white shrink-0">
+            <div className="w-7 h-7 rounded-full bg-[var(--surface-3)] flex items-center justify-center text-[11px] font-semibold text-[var(--accent)] shrink-0">
               BM
             </div>
             <div className="min-w-0">

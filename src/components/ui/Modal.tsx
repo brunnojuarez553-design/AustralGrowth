@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useId } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
@@ -14,6 +14,8 @@ interface ModalProps {
 }
 
 export function Modal({ open, onClose, title, subtitle, children, width = 'md' }: ModalProps) {
+  const titleId = useId()
+
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -36,12 +38,12 @@ export function Modal({ open, onClose, title, subtitle, children, width = 'md' }
       onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}
     >
       <div
-        className={cn('w-full rounded-[26px] max-h-[90vh] overflow-y-auto future-enter', widths[width])}
-        style={{ background: 'linear-gradient(145deg,rgba(34,34,38,.98),rgba(18,18,21,.98))', border: '1px solid rgba(255,255,255,.11)', boxShadow: 'inset 0 1px rgba(255,255,255,.06),0 35px 100px rgba(0,0,0,.65)' }}
+        role="dialog" aria-modal="true" aria-labelledby={titleId}
+        className={cn('growth-dialog w-full rounded-[20px] max-h-[90dvh] overflow-y-auto', widths[width])}
       >
-        <div className="flex items-start justify-between px-6 py-5 border-b sticky top-0 z-10 backdrop-blur-2xl" style={{ borderColor: 'var(--border)', background: 'rgba(26,26,29,.88)' }}>
+        <div className="growth-dialog-header flex items-start justify-between px-6 py-5 border-b sticky top-0 z-10" style={{ borderColor: 'var(--border)' }}>
           <div>
-            <h2 className="text-[14.5px] font-semibold" style={{ color: 'var(--text)' }}>{title}</h2>
+            <h2 id={titleId} className="text-[14.5px] font-semibold" style={{ color: 'var(--text)' }}>{title}</h2>
             {subtitle && <p className="text-[11.5px] mt-0.5" style={{ color: 'var(--text-3)' }}>{subtitle}</p>}
           </div>
           <button onClick={onClose} className="p-2 rounded-full bg-white/[.045] border border-white/[.06] transition-all hover:bg-white/[.1]" style={{ color: 'var(--text-3)' }} aria-label="Cerrar">
@@ -63,7 +65,7 @@ export function Field({ label, children }: { label: string; children: React.Reac
   )
 }
 
-const inputClass = 'w-full bg-black/20 border border-white/[.085] rounded-[13px] px-3.5 py-2.5 text-[12.5px] outline-none focus:border-cyan-300/30 focus:ring-4 focus:ring-cyan-300/[.035] transition-all text-[var(--text)] placeholder:text-[var(--text-3)]'
+const inputClass = 'w-full bg-black/20 border border-white/[.085] rounded-[13px] px-3.5 py-2.5 text-[12.5px] outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-glow)] transition-all text-[var(--text)] placeholder:text-[var(--text-3)]'
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={cn(inputClass, props.className)} />

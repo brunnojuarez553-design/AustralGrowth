@@ -55,7 +55,7 @@ export default function ProspeccionPage() {
               onChange={e => setForm(f => ({ ...f, country: e.target.value }))}
               className="bg-[var(--surface-2)] border border-[var(--border-2)] rounded-[14px] px-3 py-2 text-[12.5px] text-[var(--text)] outline-none focus:border-[var(--accent)]" />
             <button type="submit" disabled={createLead.isPending}
-              className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-[14px] text-[12.5px] font-medium px-3 py-2 transition-all disabled:opacity-50">
+              className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--on-accent)] rounded-[14px] text-[12.5px] font-medium px-3 py-2 transition-all disabled:opacity-50">
               {createLead.isPending ? 'Guardando...' : 'Agregar lead'}
             </button>
           </form>
