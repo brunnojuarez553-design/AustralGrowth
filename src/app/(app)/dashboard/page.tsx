@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Eye, EyeOff } from 'lucide-react'
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
+import { useReducedMotion } from 'framer-motion'
+import { Eye, EyeOff, RotateCcw } from 'lucide-react'
+import { RevenueChart } from '@/components/dashboard/RevenueChart'
 import { useDashboard } from '@/hooks/useDashboard'
 import { Topbar } from '@/components/layout/Topbar'
 import { LeadFormModal } from '@/components/crm/LeadFormModal'
@@ -25,11 +26,11 @@ function Kpi({title,value,detail,icon,trend}:{title:string;value:string;detail:s
   </article>
 }
 
-const Tip=({active,payload,label}:any)=>active&&payload?.length?<div className="rounded-xl border border-white/10 bg-[#1c1c1e]/95 px-3 py-2 shadow-2xl backdrop-blur-xl"><p className="text-[10px] text-zinc-500">{label}</p><p className="mt-1 text-xs text-white">Ingresos · {formatCurrency(payload[0].value)}</p></div>:null
-
 export default function DashboardPage(){
   const {data:m,isLoading,isError,error}=useDashboard()
   const [modalOpen,setModalOpen]=useState(false)
+  const [chartReplay,setChartReplay]=useState(0)
+  const reduceMotion=useReducedMotion()
   // Conceal amounts until the saved preference is loaded to avoid a visible flash.
   const [amountsHidden,setAmountsHidden]=useState(true)
   useEffect(()=>{
@@ -71,7 +72,7 @@ export default function DashboardPage(){
       </header>
       <div className="studio-dashboard-grid">
         <section aria-label="Facturación y métricas" className="min-w-0 space-y-5">
-          <article className="studio-revenue p-5 md:p-7"><div className="mb-7 flex items-start justify-between"><div><p className="text-[10px] uppercase tracking-[.15em] text-zinc-600">Facturación</p><h3 className="mt-2 text-base font-semibold text-white">Evolución {new Date().getFullYear()}</h3></div><strong className="studio-revenue-total">{amount(m?.monthlyRevenue??0)}</strong></div><div className="h-[220px]">{amountsHidden?<div className="flex h-full flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-white/[.07] bg-white/[.015] text-zinc-500"><EyeOff size={22} aria-hidden="true"/><p className="text-xs">Importes ocultos</p><p className="text-[10px]">Usá Mostrar importes para ver el gráfico.</p></div>:<ResponsiveContainer width="100%" height="100%"><AreaChart data={m?.monthlyChart??[]} margin={{top:8,right:10,bottom:4,left:10}}><defs><linearGradient id="revenue-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--chart-revenue)" stopOpacity={0.3}/><stop offset="100%" stopColor="var(--chart-revenue)" stopOpacity={0}/></linearGradient></defs><CartesianGrid vertical={false} stroke="var(--border-2)" strokeDasharray="3 5"/><XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill:'var(--text-3)',fontSize:10}} dy={10}/><Tooltip cursor={{fill:'rgba(255,255,255,.025)'}} content={<Tip/>}/><Area type="monotone" dataKey="revenue" stroke="var(--chart-revenue)" strokeWidth={2} fill="url(#revenue-fill)" isAnimationActive={false}/></AreaChart></ResponsiveContainer>}</div></article>
+          <article className="studio-revenue p-5 md:p-7"><div className="mb-7 flex items-start justify-between"><div><p className="text-[10px] uppercase tracking-[.15em] text-zinc-600">Facturación</p><h3 className="mt-2 text-base font-semibold text-white">Evolución {new Date().getFullYear()}</h3></div><div className="flex flex-col items-end gap-2"><strong className="studio-revenue-total">{amount(m?.monthlyRevenue??0)}</strong>{!amountsHidden&&<button type="button" onClick={()=>setChartReplay(value=>value+1)} disabled={!!reduceMotion} aria-label="Volver a animar el gráfico de facturación" title="Volver a reproducir el recorrido" className="flex items-center gap-1.5 rounded-full px-2 py-1 text-[10px] text-[var(--text-2)] transition hover:bg-white/[.06] hover:text-white disabled:hidden"><RotateCcw size={12} aria-hidden="true"/> Reproducir</button>}</div></div><div className="h-[220px]">{amountsHidden?<div className="flex h-full flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-white/[.07] bg-white/[.015] text-zinc-500"><EyeOff size={22} aria-hidden="true"/><p className="text-xs">Importes ocultos</p><p className="text-[10px]">Usá Mostrar importes para ver el gráfico.</p></div>:<RevenueChart data={m?.monthlyChart??[]} replay={chartReplay} animate={!reduceMotion}/>}</div></article>
           <div className="studio-dashboard-metrics grid grid-cols-2"><Kpi title="Ingresos del mes" value={amount(m?.monthlyRevenue??0)} detail={`Objetivo ${amount(m?.monthlyGoal??0)}`} icon="ti-currency-dollar" trend={m?.revenueDelta}/><Kpi title="Nuevas oportunidades" value={String(m?.newLeadsThisMonth??0)} detail={`${m?.activeLeads??0} leads activos`} icon="ti-users" trend={m?.newLeadsDelta}/><Kpi title="Conversión comercial" value={`${(m?.closeRate??0).toFixed(0)}%`} detail="Tasa de cierre global" icon="ti-chart-dots-3"/><Kpi title="Ticket promedio" value={amount(m?.avgTicket??0)} detail="Por negocio ganado" icon="ti-receipt"/></div>
           <article className="apple-card p-6 md:p-7"><p className="text-[10px] uppercase tracking-[.15em] text-zinc-600">Pipeline</p><h3 className="mt-2 text-base font-semibold text-white">Embudo comercial</h3><div className="mt-7 space-y-4">{(m?.funnelData??[]).filter(x=>!['WON','LOST'].includes(x.stage)).slice(0,6).map((x,i)=>{const max=Math.max(...(m?.funnelData??[]).map(y=>y.count),1);return <div key={x.stage}><div className="mb-2 flex justify-between text-[10px]"><span className="text-zinc-400">{x.label}</span><span className="font-mono text-zinc-500">{x.count}</span></div><div className="h-2 overflow-hidden rounded-full bg-white/[.05]"><div className="h-full rounded-full" style={{width:`${Math.max(x.count/max*100,3)}%`,background:stageColors[i]}}/></div></div>})}</div></article>
         </section>

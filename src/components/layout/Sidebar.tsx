@@ -76,16 +76,16 @@ export function Sidebar() {
       >
         {/* Logo */}
         <div className="workspace-brand px-5 py-[20px] flex items-center gap-3">
-          <div className="relative w-9 h-9 flex items-center justify-center shrink-0 rounded-xl bg-white/[.04] border border-white/[.07] p-1.5">
+          <Link href="/dashboard" onClick={close} aria-label="Austral Web Studio — Dashboard" className="workspace-logo">
             <Image
-              src="https://res.cloudinary.com/dgp7uhps3/image/upload/v1784260223/logo_austral_web_studio_wcitrd.png"
+              src="/austral-logo.svg"
               alt="Austral Web Studio"
-              width={36}
-              height={36}
-              className="relative object-contain"
+              width={128}
+              height={78}
+              className="h-auto w-full object-contain"
               priority
             />
-          </div>
+          </Link>
           <div className="flex-1 min-w-0">
             <div className="text-[14px] font-semibold text-white tracking-[-.025em] truncate">Austral Growth</div>
             <div className="text-[9px] text-[var(--text-3)] tracking-wide">Business OS</div>
