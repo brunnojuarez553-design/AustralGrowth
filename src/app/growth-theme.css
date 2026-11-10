@@ -197,8 +197,8 @@
     background: var(--bg);
   }
   .growth-sidebar {
-    width: 3.5rem;
-    min-width: 3.5rem;
+    width: 4.5rem;
+    min-width: 4.5rem;
     height: auto;
     border: 1px solid var(--border);
     border-radius: 24px;
@@ -207,9 +207,36 @@
   .growth-sidebar .workspace-brand { justify-content: center; padding: .7rem 0; }
   .workspace-brand > :nth-child(2), .workspace-studio, .workspace-group,
   .workspace-link-label, .workspace-profile { display: none; }
-  .growth-sidebar nav { padding-inline: .38rem; }
-  .growth-sidebar nav > div + div { border-top: 1px solid var(--border); padding-top: .25rem; }
-  .growth-sidebar nav a { justify-content: center; min-height: 2.5rem; padding: .5rem; }
+  .growth-sidebar nav {
+    display: grid;
+    grid-template-rows: 3fr 3fr 4fr 2fr;
+    gap: .5rem;
+    min-height: 0;
+    padding: .25rem .5rem .75rem;
+  }
+  .growth-sidebar nav > div {
+    display: flex;
+    flex-direction: column;
+    min-height: min-content;
+    margin-top: 0;
+  }
+  .growth-sidebar nav > div + div {
+    border-top: 1px solid var(--border);
+    padding-top: .5rem;
+  }
+  .growth-sidebar nav a {
+    flex: 1;
+    justify-content: center;
+    min-height: 3rem;
+    margin-bottom: 0;
+    padding: .65rem;
+  }
+  .growth-sidebar nav a > .ti {
+    flex-shrink: 0;
+    width: 1.75rem;
+    font-size: 1.625rem;
+    line-height: 1;
+  }
   .growth-topbar { background: linear-gradient(120deg, #2c2b27, #24221e 65%, #312820); }
 }
 @media (min-width: 1024px) {
