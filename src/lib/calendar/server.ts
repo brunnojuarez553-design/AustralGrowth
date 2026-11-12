@@ -9,6 +9,7 @@ export async function calendarUser() {
   return prisma.user.findUnique({ where: { email: user.email } })
 }
 export const eventSchema = z.object({
+  syncICloud: z.boolean().default(false),
   title: z.string().trim().min(1).max(200), description: z.string().max(10000).default(''),
   location: z.string().max(500).default(''), start: z.string().datetime(), end: z.string().datetime(),
   allDay: z.boolean(), kind: z.enum(['EVENT', 'TASK']), color: z.enum(['#ff7a1a', '#60a5fa', '#34d399', '#c084fc', '#fb7185']),
@@ -19,5 +20,6 @@ export const eventSchema = z.object({
   if (v.repeatUntil && new Date(v.repeatUntil) < new Date(v.start)) ctx.addIssue({ code: 'custom', message: 'La repetición termina antes del inicio', path: ['repeatUntil'] })
 })
 export function eventData(v: z.infer<typeof eventSchema>) {
-  return { ...v, start: new Date(v.start), end: new Date(v.end), repeatUntil: v.repeatUntil ? new Date(v.repeatUntil) : null }
+  const { syncICloud: _sync, ...fields } = v
+  return { ...fields, start: new Date(v.start), end: new Date(v.end), repeatUntil: v.repeatUntil ? new Date(v.repeatUntil) : null }
 }
