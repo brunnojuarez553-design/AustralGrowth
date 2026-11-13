@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { z } from 'zod'
+import { periodBounds, inPeriod, summarize, annualProjection } from '@/lib/finance/calculations'
 
 const financeSchema = z.object({
   type: z.enum(['INCOME','EXPENSE','ADVANCE','PENDING']),
@@ -18,54 +19,30 @@ const financeSchema = z.object({
 export async function GET(req: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient()
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-    const user = session?.user
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
     const dbUser = await prisma.user.findUnique({ where: { email: user.email! } })
     if (!dbUser) return NextResponse.json({ error: 'No encontrado' }, { status: 404 })
 
     const { searchParams } = new URL(req.url)
-    const year = parseInt(searchParams.get('year') ?? new Date().getFullYear().toString())
-    const month = searchParams.get('month')
-
-    const startDate = month
-      ? new Date(year, parseInt(month) - 1, 1)
-      : new Date(year, 0, 1)
-    const endDate = month
-      ? new Date(year, parseInt(month), 0, 23, 59, 59)
-      : new Date(year, 11, 31, 23, 59, 59)
-
-    const [finances, summary] = await Promise.all([
-      prisma.finance.findMany({
-        where: { workspaceId: dbUser.workspaceId, date: { gte: startDate, lte: endDate } },
-        orderBy: { date: 'desc' },
-      }),
-      prisma.finance.groupBy({
-        by: ['type'],
-        where: { workspaceId: dbUser.workspaceId, date: { gte: startDate, lte: endDate } },
-        _sum: { amount: true },
-        _count: true,
-      }),
-    ])
-
-    const totalIncome = summary.find(s => s.type === 'INCOME')?._sum.amount ?? 0
-    const totalExpenses = summary.find(s => s.type === 'EXPENSE')?._sum.amount ?? 0
-    const pending = summary.find(s => s.type === 'PENDING')?._sum.amount ?? 0
-
-    return NextResponse.json({
-      data: {
-        finances,
-        summary: {
-          totalIncome,
-          totalExpenses,
-          netProfit: totalIncome - totalExpenses,
-          grossProfit: totalIncome,
-          pending,
-          margin: totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0,
-        },
-      },
+    const year = Number(searchParams.get('year') ?? new Date().getFullYear())
+    const month = searchParams.has('month') ? Number(searchParams.get('month')) : undefined
+    const currency = searchParams.get('currency') ?? 'USD'
+    try { periodBounds({ year, month }) } catch { return NextResponse.json({ error: 'Período inválido' }, { status: 400 }) }
+    const annualBounds = periodBounds({ year })
+    const annualEntries = await prisma.finance.findMany({
+      where: { workspaceId: dbUser.workspaceId, date: { gte: annualBounds.start, lt: annualBounds.end } },
+      orderBy: [{ date: 'desc' }, { id: 'asc' }],
     })
+    const finances = annualEntries.filter(entry => inPeriod(entry, { year, month }) && entry.currency === currency)
+    const summary = summarize(finances, currency)
+    return NextResponse.json({ data: {
+      finances,
+      summary: { ...summary, totalIncome: summary.billed, totalExpenses: summary.expenses, netProfit: summary.netCash, grossProfit: summary.billed },
+      annualProjection: annualProjection(annualEntries, year, currency),
+      currencies: Array.from(new Set(['USD', ...annualEntries.map(entry => entry.currency)])),
+    } })
   } catch (error) {
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
