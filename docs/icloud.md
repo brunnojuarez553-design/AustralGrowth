@@ -4,13 +4,13 @@
 
 La implementación agrega conexión directa con iCloud (CalDAV), elección de un calendario editable y sincronización de eventos en ambos sentidos. La clave de cifrado de producción se configuró en el proyecto Vercel que sirve `australwebstudio.online` (`austral-growth-zw`). No se guardó en Git.
 
-**Activación de base pendiente:** la conexión Supabase disponible en esta sesión no tiene permiso sobre el proyecto de AustralGrowth (`bwdenqwcgjxmvlizepgp`). Ese proyecto no aparece entre los proyectos de la cuenta actualmente conectada. No se aplicó SQL a otra base ni se recuperaron credenciales de producción por vías alternativas.
+**Base activada el 13 de noviembre de 2026:** se recuperó el acceso autorizado al proyecto AustralGrowth (`bwdenqwcgjxmvlizepgp`) y se aplicó la migración `add_icloud_calendar_sync`. Se verificaron ambas tablas con RLS activo y sin acceso SELECT para `anon` ni `authenticated`. No volver a ejecutar el script de creación en esta base.
 
 El código detecta tablas ausentes y mantiene operativo el calendario local. Hasta completar la activación, el panel informa que iCloud aún no está habilitado y no pide la contraseña de Apple.
 
 ## Activación por el responsable
 
-1. Conectar Supabase con la cuenta/organización que tiene el proyecto **austral-growth-os**, o ejecutar allí una sola vez `prisma/icloud-setup.sql`. El script agrega únicamente `ICloudConnection` e `ICloudObject`, índices y relaciones. No borra ni modifica eventos existentes.
+1. Para una instalación nueva, conectar Supabase con la cuenta/organización que tiene el proyecto y ejecutar una sola vez `prisma/icloud-setup.sql`. En **austral-growth-os** ya se ejecutó el 13/11/2026. El script agrega únicamente `ICloudConnection` e `ICloudObject`, índices y relaciones. No borra ni modifica eventos existentes.
 2. Verificar la tabla, RLS y permisos. Ambas tablas son de uso exclusivo del servidor Prisma; no tienen acceso para `anon`, `authenticated` ni `PUBLIC`.
 3. Confirmar que `CALENDAR_ENCRYPTION_KEY` está configurada en producción: 32 bytes aleatorios representados como 64 caracteres hexadecimales. Usar una clave exclusiva por base/entorno; no exponerla con prefijo `NEXT_PUBLIC_`. Cambiarla exige volver a autorizar las cuentas existentes.
 4. Desplegar la versión y entrar en **Operaciones → Calendario → Conectar iCloud**.
@@ -38,7 +38,7 @@ Los eventos deben pertenecer a iCloud. Un evento almacenado solo en el teléfono
 
 Autorización de sesión con Supabase `getUser`; cada operación filtra usuario y workspace. Secretos AES-256-GCM con AAD vinculada al usuario. Las credenciales no se serializan al navegador ni a logs. Red restringida a `caldav.icloud.com` y shards `pNN-caldav.icloud.com`, con HTTPS, controles de redirección y pertenencia a la colección, límites de respuesta y rechazo de DTD/entidades XML. Bloqueo con lease evita sincronizaciones concurrentes y protege las ediciones locales mientras se aplican cambios.
 
-Verificación realizada: compilación de producción con credenciales públicas ficticias; TypeScript; 25 pruebas en Argentina y Nueva York sobre cifrado, protocolo CalDAV simulado, reglas de fechas, conflictos, cola de reintentos y eliminaciones. No hubo acceso a una cuenta Apple real ni a la base de AustralGrowth. La prueba visual local se intentó, pero Chromium no pudo crear su socket por las restricciones del entorno (`Operation not permitted`); no se declara QA visual aprobada.
+Verificación realizada: compilación de producción con credenciales públicas ficticias; TypeScript; 25 pruebas en Argentina y Nueva York sobre cifrado, protocolo CalDAV simulado, reglas de fechas, conflictos, cola de reintentos y eliminaciones. No hubo acceso a una cuenta Apple real. Posteriormente se activó la base de AustralGrowth y se verificaron tablas y permisos de lectura; la prueba de escritura temporal no se ejecutó porque venció la confirmación nativa. La prueba completa con iPhone queda pendiente de la autorización personal de Apple. La prueba visual local se intentó, pero Chromium no pudo crear su socket por las restricciones del entorno (`Operation not permitted`); no se declara QA visual aprobada.
 
 ```sh
 npm ci
