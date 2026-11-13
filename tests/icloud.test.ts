@@ -123,3 +123,16 @@ test('multiget accepts Apple aliases and collection metadata without losing the 
   const apple = client(async () => multi(prop(collection, '<d:getetag>"collection-tag"</d:getetag>') + prop('https://caldav.icloud.com/123/calendars/work/event.ics', '<d:getetag>"v1"</d:getetag><c:calendar-data>calendar text</c:calendar-data>')))
   assert.deepEqual(await apple.read(collection,[eventUrl]), [{url:eventUrl,etag:'"v1"',data:'calendar text'}])
 })
+test('Chromium Buenos Aires alias round-trips without changing instants or recurrence times', () => {
+  const raw = writeIcal({ ...fields, recurrence: 'WEEKLY' }, 'argentina-alias', 'America/Buenos_Aires')
+  assert.ok(raw.includes('TZID:America/Buenos_Aires'))
+  assert.ok(raw.includes('DTSTART;TZID=America/Buenos_Aires:20261112T090000'))
+  const event = readIcal(raw, 'America/Buenos_Aires')
+  assert.equal(event.fields.start.toISOString(), fields.start.toISOString())
+  const expanded = expandIcal(event.data, new Date('2026-11-12T00:00:00Z'), new Date('2026-11-20T00:00:00Z'))
+  assert.deepEqual(expanded.map(item => item.start.toISOString()), ['2026-11-12T12:00:00.000Z','2026-11-19T12:00:00.000Z'])
+})
+test('Apple legacy Argentina TZID without VTIMEZONE resolves to the same timezone', () => {
+  const raw='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\nUID:apple-argentina\r\nDTSTART;TZID=America/Buenos_Aires:20261112T090000\r\nDTEND;TZID=America/Buenos_Aires:20261112T100000\r\nSUMMARY:Consulta\r\nEND:VEVENT\r\nEND:VCALENDAR'
+  assert.equal(readIcal(raw,'America/Buenos_Aires').fields.start.toISOString(),'2026-11-12T12:00:00.000Z')
+})

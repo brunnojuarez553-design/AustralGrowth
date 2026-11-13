@@ -9,13 +9,25 @@ type EventFields = Pick<DBEvent, 'title' | 'description' | 'location' | 'start' 
 export function fingerprint(event: EventFields) {
   return createHash('sha256').update(JSON.stringify([event.title, event.description, event.location, event.start.toISOString(), event.end.toISOString(), event.allDay, event.recurrence, event.repeatUntil?.toISOString() ?? null, event.reminderMinutes])).digest('hex')
 }
+const zoneAliases: Record<string, string> = {
+  'America/Buenos_Aires': 'America/Argentina/Buenos_Aires',
+  'America/Catamarca': 'America/Argentina/Catamarca',
+  'America/ComodRivadavia': 'America/Argentina/Catamarca',
+  'America/Cordoba': 'America/Argentina/Cordoba',
+  'America/Jujuy': 'America/Argentina/Jujuy',
+  'America/Mendoza': 'America/Argentina/Mendoza',
+}
 function attachZone(component: ICAL.Component, zone: string) {
   if (zone === 'UTC' || zone === 'Etc/UTC') return ICAL.Timezone.utcTimezone
   const found = component.getAllSubcomponents('vtimezone').find(c => c.getFirstPropertyValue('tzid') === zone)
   if (!found) {
-    const definition = getVtimezoneComponent(zone)
+    const definition = getVtimezoneComponent(zoneAliases[zone] || zone)
     if (!definition) throw new ICloudError('TIMEZONE', `La zona horaria ${zone.slice(0, 80)} no está disponible. Elegí otra zona.`)
-    component.addSubcomponent(new ICAL.Component(ICAL.parse(definition)))
+    const timezone = new ICAL.Component(ICAL.parse(definition))
+    // Keep the requested TZID: existing Apple events and Chromium may use the
+    // legacy IANA alias while the bundled definitions use the canonical name.
+    timezone.updatePropertyWithValue('tzid', zone)
+    component.addSubcomponent(timezone)
   }
   return component.getTimeZoneByID(zone)
 }
