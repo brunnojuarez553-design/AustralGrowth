@@ -13,12 +13,31 @@ export function appleUrl(value: string, base = 'https://caldav.icloud.com/') {
   if (url.protocol !== 'https:' || url.port || url.username || url.password || url.search || url.hash || !/^(?:caldav|p\d+-caldav)\.icloud\.com$/i.test(url.hostname)) throw new ICloudError('URL', 'iCloud devolvió una dirección no permitida.')
   return url.href
 }
+function resourcePath(path: string) {
+  try {
+    return path.split('/').map(segment => {
+      const decoded = decodeURIComponent(segment)
+      if (decoded === '.' || decoded === '..' || /[\\/\u0000]/.test(decoded)) throw new Error('path')
+      return encodeURIComponent(decoded)
+    }).join('/')
+  } catch { throw new ICloudError('URL', 'iCloud devolvió una ruta de evento no válida.') }
+}
+function collectionResponse(value: string, calendarUrl: string) {
+  const collection = new URL(appleUrl(calendarUrl)), candidate = new URL(appleUrl(value.trim(), calendarUrl))
+  return resourcePath(candidate.pathname).replace(/\/$/, '') === resourcePath(collection.pathname).replace(/\/$/, '')
+}
 export function objectUrl(value: string, calendarUrl: string) {
-  const collection = new URL(appleUrl(calendarUrl)), candidate = new URL(appleUrl(value, calendarUrl))
-  const prefix = collection.pathname.endsWith('/') ? collection.pathname : collection.pathname + '/'
-  const decoded = decodeURIComponent(candidate.pathname)
-  if (candidate.origin !== collection.origin || !candidate.pathname.startsWith(prefix) || decoded.includes('/../') || decoded.includes('/./') || candidate.pathname === prefix) throw new ICloudError('URL', 'El evento no pertenece al calendario seleccionado.')
-  return candidate.href
+  const collection = new URL(appleUrl(calendarUrl))
+  const base = collection.href.endsWith('/') ? collection.href : collection.href + '/'
+  const candidate = new URL(appleUrl(value.trim(), base))
+  const parent = resourcePath(collection.pathname)
+  const prefix = parent.endsWith('/') ? parent : parent + '/'
+  const path = resourcePath(candidate.pathname)
+  if (!path.startsWith(prefix) || path === prefix) throw new ICloudError('URL', 'El evento no pertenece al calendario seleccionado (ruta distinta).')
+  // Apple may return a different trusted CalDAV shard/alias for the same href.
+  // Keep the exact account/calendar path and always send credentials to the
+  // selected collection's verified origin, never to the response's host.
+  return new URL(path, collection.origin).href
 }
 async function boundedText(response: Response, limit: number) {
   if (Number(response.headers.get('content-length')) > limit) throw new ICloudError('LIMIT', 'El calendario supera el tamaño admitido. Elegí un calendario de trabajo más pequeño.')
@@ -78,14 +97,16 @@ export class AppleCalDAV {
     }).map(r => ({ url: appleUrl(r.href, calendars.url), name: String(r.prop.displayname || 'Calendario iCloud').slice(0, 200) })).slice(0, 100)
   }
   async inventory(calendar: string): Promise<RemoteObject[]> {
-    const { responses } = await this.multi(calendar, 'REPORT', '<c:calendar-query xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav"><d:prop><d:getetag/></d:prop><c:filter><c:comp-filter name="VCALENDAR"><c:comp-filter name="VEVENT"/></c:comp-filter></c:filter></c:calendar-query>', '1')
+    const { responses: listed } = await this.multi(calendar, 'REPORT', '<c:calendar-query xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav"><d:prop><d:getetag/></d:prop><c:filter><c:comp-filter name="VCALENDAR"><c:comp-filter name="VEVENT"/></c:comp-filter></c:filter></c:calendar-query>', '1')
+    const responses = listed.filter(r => !collectionResponse(r.href, calendar))
     if (responses.length > 2000) throw new ICloudError('LIMIT', 'Elegí un calendario con menos de 2000 eventos o series.')
     return responses.map(r => { if (!r.ok || !r.prop.getetag) throw new ICloudError('INCOMPLETE', 'iCloud devolvió un listado incompleto. No se modificaron eliminaciones.'); return { url: objectUrl(r.href, calendar), etag: String(r.prop.getetag) } })
   }
   async read(calendar: string, urls: string[]): Promise<RemoteObject[]> {
     if (!urls.length) return []
     const hrefs = urls.map(url => `<d:href>${xml(new URL(objectUrl(url, calendar)).pathname)}</d:href>`).join('')
-    const { responses } = await this.multi(calendar, 'REPORT', `<c:calendar-multiget xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav"><d:prop><d:getetag/><c:calendar-data/></d:prop>${hrefs}</c:calendar-multiget>`, '1')
+    const { responses: listed } = await this.multi(calendar, 'REPORT', `<c:calendar-multiget xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav"><d:prop><d:getetag/><c:calendar-data/></d:prop>${hrefs}</c:calendar-multiget>`, '1')
+    const responses = listed.filter(r => !collectionResponse(r.href, calendar))
     const values = responses.map(r => { if (!r.ok || !r.prop.getetag || !r.prop['calendar-data']) throw new ICloudError('INCOMPLETE', 'Un evento cambió mientras se sincronizaba. Volvé a intentar.'); return { url: objectUrl(r.href, calendar), etag: String(r.prop.getetag), data: String(r.prop['calendar-data']) } })
     if (values.length !== urls.length || values.some(v => !urls.includes(v.url))) throw new ICloudError('INCOMPLETE', 'La lectura del calendario quedó incompleta.')
     return values

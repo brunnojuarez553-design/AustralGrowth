@@ -102,3 +102,24 @@ test('floating iCloud times use the selected timezone instead of the server time
   const occurrences = expandIcal(event.data, new Date('2026-11-12T00:00:00Z'), new Date('2026-11-13T00:00:00Z'))
   assert.equal(occurrences[0].start.toISOString(), '2026-11-12T12:00:00.000Z')
 })
+test('Apple shard aliases resolve only inside the exact selected account/calendar', () => {
+  assert.equal(objectUrl('https://caldav.icloud.com/123/calendars/work/event.ics', collection), eventUrl)
+  assert.equal(objectUrl('https://p152-caldav.icloud.com/123/calendars/work/event.ics', collection), eventUrl)
+  assert.throws(() => objectUrl('https://p152-caldav.icloud.com/999/calendars/work/event.ics', collection))
+  assert.throws(() => objectUrl('https://p152-caldav.icloud.com/123/calendars/other/event.ics', collection))
+  assert.throws(() => objectUrl('https://evil.test/123/calendars/work/event.ics', collection))
+})
+test('Apple resource encoding is canonical across inventory, multiget and queued writes', () => {
+  assert.equal(objectUrl('event@example.com.ics', collection), collection + 'event%40example.com.ics')
+  assert.equal(objectUrl('event%40example.com.ics', collection), collection + 'event%40example.com.ics')
+  assert.throws(() => objectUrl('%2e%2e%2fsecret.ics', collection))
+  assert.throws(() => objectUrl('event%5csecret.ics', collection))
+})
+test('collection metadata in Apple REPORT is not treated as a calendar event', async () => {
+  const apple = client(async () => multi(prop(collection, '<d:getetag>"collection-tag"</d:getetag>') + prop('/123/calendars/work/event.ics', '<d:getetag>"v1"</d:getetag>')))
+  assert.deepEqual(await apple.inventory(collection), [{url:eventUrl,etag:'"v1"'}])
+})
+test('multiget accepts Apple aliases and collection metadata without losing the requested object', async () => {
+  const apple = client(async () => multi(prop(collection, '<d:getetag>"collection-tag"</d:getetag>') + prop('https://caldav.icloud.com/123/calendars/work/event.ics', '<d:getetag>"v1"</d:getetag><c:calendar-data>calendar text</c:calendar-data>')))
+  assert.deepEqual(await apple.read(collection,[eventUrl]), [{url:eventUrl,etag:'"v1"',data:'calendar text'}])
+})
