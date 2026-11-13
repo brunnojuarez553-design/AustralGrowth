@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  serverExternalPackages: ['@touch4it/ical-timezones'],
+  outputFileTracingIncludes: {
+    '/api/calendar/**': ['./node_modules/@touch4it/ical-timezones/zones/**/*'],
+    '/api/cron/calendar-sync': ['./node_modules/@touch4it/ical-timezones/zones/**/*'],
+  },
   images: { remotePatterns: [{ protocol: 'https', hostname: 'res.cloudinary.com' }, { protocol: 'https', hostname: '*.supabase.co' }] },
   async headers() {
     const csp = [

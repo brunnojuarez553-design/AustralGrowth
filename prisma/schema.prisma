@@ -18,6 +18,7 @@ model User {
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  iCloudConnection ICloudConnection?
   calendarEvents CalendarEvent[]
   leads       Lead[]
   activities  Activity[]
@@ -40,6 +41,7 @@ model Workspace {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   users       User[]
+  iCloudConnections ICloudConnection[]
   calendarEvents CalendarEvent[]
   leads       Lead[]
   projects    Project[]
@@ -421,6 +423,7 @@ enum InsightType {
 
 
 model CalendarEvent {
+  iCloudObject ICloudObject?
   id String @id @default(cuid())
   workspaceId String
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -441,4 +444,49 @@ model CalendarEvent {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@index([workspaceId, userId, start])
+}
+
+// Credentials never leave the server; all access is scoped by verified user/workspace.
+model ICloudConnection {
+  id String @id @default(cuid())
+  userId String @unique
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspaceId String
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  email String
+  encryptedPassword String @db.Text
+  active Boolean @default(false)
+  calendars Json
+  calendarUrl String?
+  calendarName String?
+  timeZone String @default("America/Argentina/Buenos_Aires")
+  lastSyncAt DateTime?
+  lastError String?
+  lastAttemptAt DateTime?
+  lockToken String?
+  lockUntil DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  objects ICloudObject[]
+  @@index([workspaceId])
+}
+
+model ICloudObject {
+  id String @id @default(cuid())
+  connectionId String
+  connection ICloudConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  eventId String? @unique
+  event CalendarEvent? @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  url String
+  uid String
+  etag String?
+  rawIcs String? @db.Text
+  baseHash String?
+  uploaded Boolean @default(false)
+  deletedLocally Boolean @default(false)
+  readOnly Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([connectionId, url])
+  @@index([connectionId])
 }

@@ -1,6 +1,8 @@
+import { expandIcal } from './ical'
 import { addDays, addWeeks, addMonths } from 'date-fns'
 
 export type CalendarEvent = {
+  icloud?: boolean; icloudData?: string | null; readOnly?: boolean; syncICloud?: boolean;
   id: string; title: string; description: string; location: string;
   start: string; end: string; allDay: boolean; kind: 'EVENT' | 'TASK';
   color: string; completed: boolean; recurrence: 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY';
@@ -11,6 +13,10 @@ export const colors = ['#ff7a1a', '#60a5fa', '#34d399', '#c084fc', '#fb7185']
 export function occurrences(events: CalendarEvent[], from: Date, to: Date): Occurrence[] {
   const result: Occurrence[] = []
   for (const event of events) {
+    if (event.icloudData) {
+      try { for (const entry of expandIcal(event.icloudData, from, to)) result.push({ ...event, occurrenceStart: entry.start, occurrenceEnd: entry.end, key: `${event.id}:${entry.start.toISOString()}` }) } catch { /* Keep malformed remote data out of the grid. */ }
+      continue
+    }
     const original = new Date(event.start), originalEnd = new Date(event.end)
     let current = original
     for (let n = 0; n < 36600 && current < to; n++) {
